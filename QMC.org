@@ -41,7 +41,7 @@
   We propose different exercises to understand quantum Monte Carlo (QMC)
   methods. In the first section, we start with the computation of the energy of a
   hydrogen atom using numerical integration. The goal of this section is
-  to familarize yourself with the concept of /local energy/.
+  to familiarize yourself with the concept of /local energy/.
   Then, we introduce the variational Monte Carlo (VMC) method which
   computes a statistical estimate of the expectation value of the energy
   associated with a given wave function, and apply this approach to the
@@ -90,14 +90,18 @@
   arbitrary function $f(x)$ with respect to a probability density
   function $P(x)$ is given by
 
-  $$ \langle f \rangle_P = \int_{-\infty}^\infty P(x)\, f(x)\,dx, $$
+  $$ \langle f \rangle_P = \int_{-\infty}^\infty \frac{f(x)}{P(x)}\, P(x)\, dx = \int_{-\infty}^\infty \frac{f(x)}{P(x)}\, dP(x), $$
 
   where a probability density function $P(x)$ is non-negative
   and integrates to one:
 
   $$ \int_{-\infty}^\infty P(x)\,dx = 1. $$
 
-  Similarly, we can view the the energy of a system, $E$, as the expected value of the local energy with respect to 
+  and $dP(x)$ satisfies:
+
+  $$ dP(x) = \int_{0}^x P(y)\,dy . $$
+
+  Similarly, we can view the energy of a system, $E$, as the expected value of the local energy with respect to
   a probability density $P(\mathbf{r})$ defined in 3$N$ dimensions:
   
   $$ E =  \int E_L(\mathbf{r}) P(\mathbf{r})\,d\mathbf{r} \equiv  \langle E_L \rangle_{P}\,, $$
@@ -156,7 +160,7 @@
     #+begin_exercise
     Write a function which computes the potential at $\mathbf{r}$.
     The function accepts a 3-dimensional vector =r= as input argument
-    and returns the potential.
+    and returns the scalar potential.
     #+end_exercise
 
     $\mathbf{r}=\left( \begin{array}{c} x \\ y\\ z\end{array} \right)$, so
