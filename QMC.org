@@ -35,7 +35,7 @@
 
 * Introduction
 
-  This website contains the QMC tutorial of the 2021 LTTC winter school
+  This website contains the QMC tutorial of the 2023 LTTC winter school
   [[https://www.irsamc.ups-tlse.fr/lttc/Luchon][Tutorials in Theoretical Chemistry]].
 
   We propose different exercises to understand quantum Monte Carlo (QMC)
@@ -2773,18 +2773,18 @@ gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
 * Schedule                                                         :noexport:
 
  |------------------------------+---------|
- | <2021-02-04 Thu 09:00-10:30> | Lecture |
+ | <2023-01-24 Tue 09:00-10:30> | Lecture |
  |------------------------------+---------|
- | <2021-02-04 Thu 11:00-11:20> |     2.1 |
- | <2021-02-04 Thu 11:20-11:40> |     2.2 |
- | <2021-02-04 Thu 11:40-12:15> |     2.3 |
- | <2021-02-04 Thu 12:15-12:30> |     2.4 |
+ | <2023-01-24 Tue 11:00-11:20> |     2.1 |
+ | <2023-01-24 Tue 11:20-11:40> |     2.2 |
+ | <2023-01-24 Tue 11:40-12:15> |     2.3 |
+ | <2023-01-24 Tue 12:15-12:30> |     2.4 |
  |------------------------------+---------|
- | <2021-02-04 Thu 14:00-14:10> |     3.1 |
- | <2021-02-04 Thu 14:10-14:30> |     3.2 |
- | <2021-02-04 Thu 14:30-15:30> |     3.3 |
- | <2021-02-04 Thu 15:30-16:30> |     3.4 |
- | <2021-02-04 Thu 16:30-18:30> |     4.5 |
+ | <2023-01-24 Tue 14:00-14:10> |     3.1 |
+ | <2023-01-24 Tue 14:10-14:30> |     3.2 |
+ | <2023-01-24 Tue 14:30-15:30> |     3.3 |
+ | <2023-01-24 Tue 15:30-16:30> |     3.4 |
+ | <2023-01-24 Tue 16:30-18:30> |     4.5 |
  |------------------------------+---------|
 
 * Acknowledgments
