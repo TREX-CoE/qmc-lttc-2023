@@ -9,21 +9,7 @@ def MonteCarlo(a, nmax):
      normalization = 0.
 
      for istep in range(nmax):
-          #r = np.random.uniform(-5., 5., (3))
-          R = 5.
-          phi = np.random.rand()*2*np.pi
-          costheta = np.random.rand()*2 - 1.0
-          u = np.random.rand()
-
-          theta = np.arccos( costheta )
-          r = R * np.cbrt( u )
-
-          # Spherical distribution
-          x = r * np.sin( theta) * np.cos( phi )
-          y = r * np.sin( theta) * np.sin( phi )
-          z = r * np.cos( theta )
-          r = np.array([x,y,z],dtype=np.Float64)
-
+          r = np.random.uniform(-5., 5., (3))
 
           w = psi(a,r)
           w = w*w
