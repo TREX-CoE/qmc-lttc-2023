@@ -1277,7 +1277,6 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
 
 from hydrogen  import *
 from qmc_stats import *
-import numpy as np
 
 def MonteCarlo(a, nmax):
      energy = 0.
@@ -2211,7 +2210,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     
     For large positive values of $\tau$, $\psi$ is dominated by the
     $k=0$ term, namely, the lowest eigenstate. If we adjust $E_{\rm ref}$ to the running estimate of $E_0$,
-    we can expect that simulating the differetial equation in
+    we can expect that simulating the differential equation in
     imaginary time will converge to the exact ground state of the
     system.
 
@@ -2269,8 +2268,8 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
    
     In a molecular system, the potential is far from being constant
     and, in fact, diverges at the inter-particle coalescence points. Hence,
-    it results in very large fluctuations of the erm weight associated with
-    the potental, making the calculations impossible in practice.
+    it results in very large fluctuations of the weight associated with
+    the potential, making the calculations impossible in practice.
     Fortunately, if we multiply the Schrödinger equation by a chosen
     /trial wave function/ $\Psi_T(\mathbf{r})$ (Hartree-Fock, Kohn-Sham
     determinant, CI wave function, /etc/), one obtains

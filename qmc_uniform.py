@@ -2,7 +2,6 @@
 
 from hydrogen  import *
 from qmc_stats import *
-import numpy as np
 
 def MonteCarlo(a, nmax):
      energy = 0.
