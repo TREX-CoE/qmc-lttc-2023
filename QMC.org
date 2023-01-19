@@ -1284,22 +1284,7 @@ def MonteCarlo(a, nmax):
      normalization = 0.
 
      for istep in range(nmax):
-          # Cubic distribution
-          #r = np.random.uniform(-5., 5., (3))
-          R = 5.
-          phi = np.random.rand()*2*np.pi
-          costheta = np.random.rand()*2 - 1.0
-          u = np.random.rand()
-
-          theta = np.arccos( costheta )
-          r = R * np.cbrt( u )
-
-          # Spherical distribution (Has smaller variance)
-          x = r * np.sin( theta) * np.cos( phi )
-          y = r * np.sin( theta) * np.sin( phi )
-          z = r * np.cos( theta )
-          r = np.array([x,y,z])
-
+          r = np.random.uniform(-5., 5., (3))
 
           w = psi(a,r)
           w = w*w
@@ -1463,7 +1448,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
     
     If the box is infinitely small, the ratio will be very close
     to one and all the steps will be accepted. However, the moves will be 
-    very correlated and you will visit the configurational space very slowly.
+    very correlated and you will explore the configurational space very slowly.
 
     On the other hand, if you propose too large moves, the number of
     accepted steps will decrease because the ratios might become
@@ -1721,21 +1706,25 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
    :header-args:f90: :tangle vmc_metropolis.f90
    :END:
 
-   One can use more efficient numerical schemes to move the electrons by choosing a smarter expression for the transition probability.
+   One can use more efficient numerical schemes to move the electrons by
+   choosing a smarter expression for the transition probability.
    
-   The Metropolis acceptance step has to be adapted accordingly to ensure that the detailed balance condition is satisfied. This means that
-   the acceptance probability $A$ is chosen so that it is consistent with the
-   probability of leaving $\mathbf{r}_n$ and the probability of
-   entering $\mathbf{r}_{n+1}$:
+   The Metropolis acceptance step has to be adapted keeping in mind that
+   the detailed balance condition is satisfied. This means that the acceptance
+   probability $A$ is chosen so that it is consistent with the probability of
+   leaving $\mathbf{r}_n$ and the probability of entering $\mathbf{r}_{n+1}$:
 
-   \[ A(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) = \min \left( 1,
-   \frac{T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) P(\mathbf{r}_{n+1})}
-   {T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) P(\mathbf{r}_{n})}
-   \right)
+   \[
+   P(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) = A(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})
+   = A(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n})
+   \frac{P(\mathbf{r}_{n+1})}{P(\mathbf{r}_{n})}
    \]
+
    where $T(\mathbf{r}_n \rightarrow \mathbf{r}_{n+1})$ is the
    probability of transition from $\mathbf{r}_n$ to
-   $\mathbf{r}_{n+1}$.
+   $\mathbf{r}_{n+1}$ and $P(\mathbf{r}_n \rightarrow \mathbf{r}_{n+1})$ is the
+   conditional probability $P(\mathbf{r}_n | \mathbf{r}_{n+1})$ and $P(\mathbf{r}_n)$
+   is the probability of being in state $\mathbf{r}_n$.
 
    In the previous example, we were using uniform sampling in a box centered
    at the current position. Hence, the transition probability was symmetric
@@ -1792,7 +1781,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
    
 
    
-   The algorithm of the previous exercise is only slighlty modified as:
+   The algorithm of the previous exercise is only slightly modified as:
    
    1) Evaluate the local energy at $\mathbf{r}_{n}$ and accumulate it
    2) Compute a new position $\mathbf{r'} = \mathbf{r}_n +
