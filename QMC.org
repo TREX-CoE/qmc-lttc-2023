@@ -1192,9 +1192,9 @@ end subroutine ave_error
 
     #+begin_exercise
     Parameterize the wave function with $a=1.2$.  Perform 30
-    independent Monte Carlo runs, each with 100 000 Monte Carlo
-    steps. Store the final energies of each run and use this array to
-    compute the average energy and the associated error bar.
+    independent Monte Carlo runs ($M$), each with 100 000 Monte Carlo
+    steps ($N_{MC}$). Store the final energies of each run and use this array to
+    compute the average energy and the associated error bar ($\delta E$).
     #+end_exercise
 
     *Python*
@@ -1277,13 +1277,29 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
 
 from hydrogen  import *
 from qmc_stats import *
+import numpy as np
 
 def MonteCarlo(a, nmax):
      energy = 0.
      normalization = 0.
 
      for istep in range(nmax):
-          r = np.random.uniform(-5., 5., (3))
+          # Cubic distribution
+          #r = np.random.uniform(-5., 5., (3))
+          R = 5.
+          phi = np.random.rand()*2*np.pi
+          costheta = np.random.rand()*2 - 1.0
+          u = np.random.rand()
+
+          theta = np.arccos( costheta )
+          r = R * np.cbrt( u )
+
+          # Spherical distribution (Has smaller variance)
+          x = r * np.sin( theta) * np.cos( phi )
+          y = r * np.sin( theta) * np.sin( phi )
+          z = r * np.cos( theta )
+          r = np.array([x,y,z])
+
 
           w = psi(a,r)
           w = w*w
@@ -1301,9 +1317,6 @@ E, deltaE = ave_error(X)
 
 print(f"E = {E} +/- {deltaE}")
      #+END_SRC
-
-     #+RESULTS:
-     : E = -0.48363807880008725 +/- 0.002330876047368999
 
     *Fortran*
      #+BEGIN_SRC f90 :exports code
