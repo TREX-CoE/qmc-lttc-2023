@@ -1,5 +1,5 @@
 #+TITLE: Quantum Monte Carlo
-#+AUTHOR: Anthony Scemama, Claudia Filippi
+#+AUTHOR: Anthony Scemama, Vijay Gopal Chilkuri, Claudia Filippi
 #+LANGUAGE:  en
 #+INFOJS_OPT: toc:t mouse:underline path:org-info.js
 #+STARTUP: latexpreview
