@@ -1,27 +1,33 @@
+#include <stdio.h>
+#include <math.h>
 #include "hydrogen.h"
 
+#define NPOINTS  50
+#define NEXPO     6
+
 int main() {
-      const double a[6] = {0.1, 0.2, 0.5, 1., 1.5, 2.};
-      const int sizex = 50;
-      double x[sizex], dx;
 
-      dx = 10.0 / (sizex - 1);
-      for (int i = 0; i < sizex; ++i) {
-	    x[i] = -5.0 + (i - 1) * dx;
-      }
+    double x[NPOINTS], energy, dx, r[3];
+    double a[NEXPO] = { 0.1, 0.2, 0.5, 1.0, 1.5, 2.0 };
+    int i, j;
 
-      FILE * fil;
+    dx = 10.0/(NPOINTS-1);
+    for (i = 0; i < NPOINTS; i++) {
+        x[i] = -5.0 + i*dx;
+    }
 
-      fil = fopen("./data", "w+");
+    for (i = 0; i < 3; i++) {
+        r[i] = 0.0;
+    }
 
-      for (int i; i < 6; ++i) {
-	    for (int j = 0; j < sizex; ++j) {
-		  fprintf(fil, "%lf %lf\n", x[j], e_loc(a[i], &x[j], 1)); 
-	    }
-	    fprintf(fil, "\n\n");
-      }
-
-      fclose(fil);
-
-      return 0;
+    for (j = 0; j < NEXPO; j++) {
+        printf("# a=%f\n", a[j]);
+        for (i = 0; i < NPOINTS; i++) {
+            r[0] = x[i];
+            energy = e_loc(a[j], r);
+            printf("%f %f\n", x[i], energy);
+        }
+        printf("\n\n");
+    }
+    return 0;
 }

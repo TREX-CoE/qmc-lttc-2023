@@ -139,13 +139,15 @@
    :PROPERTIES:
    :header-args:python: :tangle hydrogen.py
    :header-args:f90: :tangle hydrogen.f90
+   :header-args:c: :tangle hydrogen.c
    :END:
 
-   You will now program all quantities needed to compute the local energy of the H atom for the given wave function.
+   You will now program all quantities needed to compute the local
+   energy of the Hydrogen atom for the given wave function.
    
    Write all the functions of this section in a single file :
-   ~hydrogen.py~ if you use Python, or ~hydrogen.f90~ is you use
-   Fortran.
+   ~hydrogen.py~ if you use Python, ~hydrogen.f90~ if you use
+   Fortran, or ~hydrogen.c~ if you use C.
    
    #+begin_note
    - When computing a square root in $\mathbb{R}$, *always* make sure
@@ -168,8 +170,8 @@
     If the distance is greater than 0, the potential is calculated as 
 
     \[
-    \mathbf{r}=\left( \begin{array}{c} x \\ y\\ z\end{array}
-    \right), \text{ so } V(\mathbf{r}) = -\frac{1}{\sqrt{x^2 + y^2 + z^2}}
+    V(\mathbf{r}) = -\frac{1}{\sqrt{x^2 + y^2 + z^2}}, \text{ with } 
+    \mathbf{r}=\left( \begin{array}{c} x \\ y\\ z\end{array} \right),
     \]
     #+end_exercise
 
@@ -238,7 +240,7 @@ end function potential
      #+END_SRC
 
      *C*
-     #+begin_src c :tangle none
+     #+begin_src c
 #include <stdio.h>   // printf
 #include <math.h>    // sqrt
 #include <stdlib.h>  // exit
@@ -308,7 +310,7 @@ end function psi
      #+END_SRC
      
      *C*
-     #+begin_src c :tangle none
+     #+begin_src c
 double psi(double a, double r[3]) {
   double distance;
 
@@ -379,6 +381,7 @@ double precision function kinetic(a,r)
 end function kinetic
      #+END_SRC
 
+     *C*
      #+begin_src c :tangle none
 double kinetic(double a, double r[3]) {
   //TODO
@@ -417,7 +420,7 @@ end function kinetic
      #+END_SRC
 
      *C*
-     #+begin_src c :tangle none
+     #+begin_src c
 double kinetic(double a, double r[3]) {
   double distance;
 
@@ -508,11 +511,12 @@ end function e_loc
      #+END_SRC
    
      *C*
-     #+begin_src c :tangle none
+     #+begin_src c
 double e_loc(double a, double r[3]) {
   return kinetic(a, r) + potential(r);
 }
      #+end_src
+
 *** Exercise 5
 
     #+begin_exercise
@@ -537,12 +541,15 @@ double e_loc(double a, double r[3]) {
    :PROPERTIES:
    :header-args:python: :tangle plot_hydrogen.py
    :header-args:f90: :tangle plot_hydrogen.f90
+   :header-args:c: :tangle plot_hydrogen.c
    :END:
    
    The program you will write in this section will be written in
-   another file (~plot_hydrogen.py~ or ~plot_hydrogen.f90~ for
+   another file (~plot_hydrogen.py~,  ~plot_hydrogen.f90~ or ~plot_hydrogen.c~ for
    example).
    It will use the functions previously defined.
+   If you use C, don't forget to write the header file corresponding
+   to the functions defined in the previous section.
 
    In Python, you should put at the beginning of the file
    #+BEGIN_SRC python :results none :tangle none
@@ -551,21 +558,40 @@ double e_loc(double a, double r[3]) {
 from hydrogen import e_loc
    #+END_SRC
    to be able to use the ~e_loc~ function of the ~hydrogen.py~ file.
+
+   #+begin_note
+   It is better to use ~#!/usr/bin/env python3~ than
+   ~#!/usr/bin/python~ because:
+   1. you are sure you are not using Python2, which is incompatible
+      with Python3 syntax,
+   2. if you are on a machine where you can load different
+      environments (VirtualEnv, module, etc), you will use the
+      ~python3~ provided by your environment, and not the system's
+      one.
+   #+end_note
    
    In Fortran, you will need to compile all the source files together:
    #+begin_src sh :exports both
 gfortran hydrogen.f90 plot_hydrogen.f90 -o plot_hydrogen
    #+end_src
 
+   Similarly, in C
+   #+begin_src sh :exports both
+gcc hydrogen.c plot_hydrogen.c -o plot_hydrogen
+   #+end_src
+
 *** Exercise
 
     #+begin_exercise
     For multiple values of $a$ (0.1, 0.2, 0.5, 1., 1.5, 2.), plot the
-    local energy along the $x$ axis. In Python, you can use matplotlib
-    for example. In Fortran, it is convenient to write in a text file
+    local energy along the $x$ axis.
+
+    In Python, you can use matplotlib for example.
+
+    In Fortran, it is convenient to write in a text file
     the values of $x$ and $E_L(\mathbf{r})$ for each point, and use
     Gnuplot to plot the files. With Gnuplot, you will need 2 blank
-    lines to separate the data corresponding to different values of $a$.
+    lines to separate the data corresponding to different values of $a$:
     #+end_exercise
 
    #+begin_note
@@ -613,12 +639,52 @@ end program plot
 
      To compile and run:
 
-     #+begin_src sh :exports both
+     #+begin_src bash :exports both
 gfortran hydrogen.f90 plot_hydrogen.f90 -o plot_hydrogen
 ./plot_hydrogen > data
      #+end_src
 
-     To plot the data using Gnuplot:
+     *C*
+     
+     #+begin_src c
+#include <stdio.h>
+#include <math.h>
+#include "hydrogen.h"
+
+#define NPOINTS  50
+#define NEXPO     6
+
+int main() {
+
+    double x[NPOINTS], energy, dx, r[3];
+    double a[NEXPO] = { 0.1, 0.2, 0.5, 1.0, 1.5, 2.0 };
+    int i, j;
+
+    dx = 10.0/(NPOINTS-1);
+    for (i = 0; i < NPOINTS; i++) {
+        x[i] = -5.0 + i*dx;
+    }
+
+    // TODO
+    return 0;
+}
+     #+end_src
+
+     To compile and run:
+
+     #+begin_src bash :exports both
+gcc hydrogen.c plot_hydrogen.c -lm -o plot_hydrogen
+./plot_hydrogen > data
+     #+end_src
+
+     #+begin_note
+     In C, you need the ~-lm~ argument to link with the math library
+     that contains functions like ~sqrt~ and ~exp~.
+     #+end_note
+
+     *Plotting for Fortran of C*
+
+     Plot the data using Gnuplot:
 
      #+begin_src gnuplot :file plot.png :exports code
 set grid
@@ -695,6 +761,59 @@ gfortran hydrogen.f90 plot_hydrogen.f90 -o plot_hydrogen
 ./plot_hydrogen > data
      #+end_src
 
+     #+RESULTS:
+
+     *C*
+     #+begin_src c :tangle hydrogen.h
+double potential (double r[3]);
+double psi       (double a, double r[3]);
+double kinetic   (double a, double r[3]);
+double e_loc     (double a, double r[3]);
+     #+end_src
+
+     #+begin_src c
+#include <stdio.h>
+#include <math.h>
+#include "hydrogen.h"
+
+#define NPOINTS  50
+#define NEXPO     6
+
+int main() {
+
+    double x[NPOINTS], energy, dx, r[3];
+    double a[NEXPO] = { 0.1, 0.2, 0.5, 1.0, 1.5, 2.0 };
+    int i, j;
+
+    dx = 10.0/(NPOINTS-1);
+    for (i = 0; i < NPOINTS; i++) {
+        x[i] = -5.0 + i*dx;
+    }
+
+    for (i = 0; i < 3; i++) {
+        r[i] = 0.0;
+    }
+
+    for (j = 0; j < NEXPO; j++) {
+        printf("# a=%f\n", a[j]);
+        for (i = 0; i < NPOINTS; i++) {
+            r[0] = x[i];
+            energy = e_loc(a[j], r);
+            printf("%f %f\n", x[i], energy);
+        }
+        printf("\n\n");
+    }
+    return 0;
+}
+     #+end_src
+
+     #+begin_src sh :exports none
+gcc hydrogen.c plot_hydrogen.c -lm -o plot_hydrogen
+./plot_hydrogen > data
+     #+end_src
+
+     #+RESULTS:
+
      #+begin_src gnuplot :file plot.png :exports results
 set grid
 set xrange [-5:5]
@@ -713,6 +832,7 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
    :PROPERTIES:
    :header-args:python: :tangle energy_hydrogen.py
    :header-args:f90: :tangle energy_hydrogen.f90
+   :header-args:c: :tangle energy_hydrogen.c
    :END:
 
    If the space is discretized in small volume elements $\mathbf{r}_i$
