@@ -1,35 +1,47 @@
+#include <stdio.h>
+#include <math.h>
 #include "hydrogen.h"
 
+#define NPOINTS  50
+#define NEXPO     6
+
 int main() {
-      const double a[6] = {0.1, 0.2, 0.5, 1., 1.5, 2.};
-      const int sizex = 50;
-      double energy, r[3];
-      double x[sizex], dx, w, wsum, dV;
 
-      dx = 10.0 / (sizex - 1);
-      for (int i = 0; i < sizex; ++i) {
-	    x[i] = -5.0 + (i - 1) * dx;
-      }
-      dV = dx * dx * dx;
+    double x[NPOINTS], energy, dx, r[3], delta, norm, w;
+    double a[NEXPO] = { 0.1, 0.2, 0.5, 1.0, 1.5, 2.0 };
 
-      for (int l = 0; l < 6; ++l) {
-	    energy = 0.0;
-	    wsum = 0.0;
-	    for (int i = 0; i < sizex; ++i) {
-		  r[0] = x[i];
-		  for (int j = 0; j < sizex; ++j) {
-			r[1] = x[j];
-			for (int k = 0; k < sizex; ++k) {
-			      r[2] = x[k];
-			      w = psi(a[l], r, 3) * psi(a[l], r, 3) * dV;
-			      wsum += w;
-			      energy += w * e_loc(a[l], r, 3);
-			}
-		  }
-	    }
-	    printf("a = %.2f  E = %.5f \n", a[l], energy / wsum); 
-      }
+    dx = 10.0/(NPOINTS-1);
+    for (int i = 0; i < NPOINTS; i++) {
+        x[i] = -5.0 + i*dx;
+    }
 
-      
-      return 0;
+    delta = dx*dx*dx;
+    for (int i = 0; i < 3; i++) {
+        r[i] = 0.0;
+    }
+
+    for (int j = 0; j < NEXPO; j++) {
+        energy = 0.0;
+        norm = 0.0;
+
+        for (int i = 0; i < NPOINTS; i++) {
+            r[0] = x[i];
+
+            for (int k = 0; k < NPOINTS; k++) {
+                r[1] = x[k];
+
+                for (int l = 0; l < NPOINTS; l++) {
+                    r[2] = x[l];
+
+                    w = psi(a[j], r);
+                    w = w*w*delta;
+
+                    energy += w*e_loc(a[j], r);
+                    norm += w;
+                }
+            }
+        }
+        energy = energy/norm;
+        printf("a = %f    E = %f\n", a[j], energy);
+    }
 }

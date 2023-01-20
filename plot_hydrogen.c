@@ -16,6 +16,28 @@ int main() {
         x[i] = -5.0 + i*dx;
     }
 
+    // TODO
+    return 0;
+}
+
+#include <stdio.h>
+#include <math.h>
+#include "hydrogen.h"
+
+#define NPOINTS  50
+#define NEXPO     6
+
+int main() {
+
+    double x[NPOINTS], energy, dx, r[3];
+    double a[NEXPO] = { 0.1, 0.2, 0.5, 1.0, 1.5, 2.0 };
+    int i, j;
+
+    dx = 10.0/(NPOINTS-1);
+    for (i = 0; i < NPOINTS; i++) {
+        x[i] = -5.0 + i*dx;
+    }
+
     for (i = 0; i < 3; i++) {
         r[i] = 0.0;
     }

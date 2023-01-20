@@ -879,7 +879,7 @@ for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
      #+end_src
 
     *Fortran*
-     #+begin_src f90 
+     #+begin_src f90 :tangle none
 program energy_hydrogen
   implicit none
   double precision, external :: e_loc, psi
@@ -903,12 +903,69 @@ program energy_hydrogen
 end program energy_hydrogen
      #+end_src
 
-     To compile the Fortran and run it:
+     To compile the Fortran code and run it:
 
      #+begin_src sh :results output :exports code
 gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
 ./energy_hydrogen 
      #+end_src
+
+     *C*
+     
+     #+begin_src c :tangle none
+#include <stdio.h>
+#include <math.h>
+#include "hydrogen.h"
+
+#define NPOINTS  50
+#define NEXPO     6
+
+int main() {
+
+    double x[NPOINTS], energy, dx, r[3], delta, norm, w;
+    double a[NEXPO] = { 0.1, 0.2, 0.5, 1.0, 1.5, 2.0 };
+
+    dx = 10.0/(NPOINTS-1);
+    for (int i = 0; i < NPOINTS; i++) {
+        x[i] = -5.0 + i*dx;
+    }
+
+    for (int j = 0; j < NEXPO; j++) {
+        // TODO
+        printf("a = %f    E = %f\n", a[j], energy);
+    }
+}
+     #+end_src
+
+     To compile the C code and run it:
+
+     #+begin_src sh :results output :exports code
+gcc hydrogen.c energy_hydrogen.c -lm -o energy_hydrogen
+./energy_hydrogen 
+     #+end_src
+
+   *Hints if you are stuck*
+
+   The program starts by defining some variables and arrays, including
+   an array ~a~ that contains 6 different values of the parameter ~a~
+   which will be used in the ~e_loc~ and ~psi~ functions to calculate
+   the local energy and wave function respectively.
+
+    The program then calculates the value of ~dx~, which is the step size in
+    $x$, and sets up an array ~x~ that contains 50 equally spaced points
+    between -5 and 5. The program sets all elements of the ~r~ array to 0,
+    and then enters a nested loop structure. The outer loop iterates over
+    the values of ~a~ in the ~a~ array, and the next three loops iterate
+    over the values of ~x~ in the ~x~ array for the three dimensions. For
+    each value of ~a~ and ~x~, the program sets the first element of the
+    ~r~ array to the current value of ~x~, calls the ~psi~ function to
+    calculate the wave function, calls the ~e_loc~ function to calculate
+    the local energy, and then accumulates the energy and the
+    normalization factor.
+
+    At the end of the outer loop, the program calculates the final energy
+    by dividing the accumulated energy by the accumulated normalization
+    factor, and prints the value of ~a~ and the corresponding energy.
 
 **** Solution                                                      :solution:
     *Python*
@@ -1016,6 +1073,70 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
      :  a =    1.0000000000000000          E =  -0.50000000000000000     
      :  a =    1.5000000000000000          E =  -0.39242967082602065     
      :  a =    2.0000000000000000          E =   -8.0869806678448772E-002
+
+     *C*
+     #+begin_src c
+#include <stdio.h>
+#include <math.h>
+#include "hydrogen.h"
+
+#define NPOINTS  50
+#define NEXPO     6
+
+int main() {
+
+    double x[NPOINTS], energy, dx, r[3], delta, norm, w;
+    double a[NEXPO] = { 0.1, 0.2, 0.5, 1.0, 1.5, 2.0 };
+
+    dx = 10.0/(NPOINTS-1);
+    for (int i = 0; i < NPOINTS; i++) {
+        x[i] = -5.0 + i*dx;
+    }
+
+    delta = dx*dx*dx;
+    for (int i = 0; i < 3; i++) {
+        r[i] = 0.0;
+    }
+
+    for (int j = 0; j < NEXPO; j++) {
+        energy = 0.0;
+        norm = 0.0;
+
+        for (int i = 0; i < NPOINTS; i++) {
+            r[0] = x[i];
+
+            for (int k = 0; k < NPOINTS; k++) {
+                r[1] = x[k];
+
+                for (int l = 0; l < NPOINTS; l++) {
+                    r[2] = x[l];
+
+                    w = psi(a[j], r);
+                    w = w*w*delta;
+
+                    energy += w*e_loc(a[j], r);
+                    norm += w;
+                }
+            }
+        }
+        energy = energy/norm;
+        printf("a = %f    E = %f\n", a[j], energy);
+    }
+}
+     #+end_src
+     
+     #+begin_src sh :results output :exports results
+gcc hydrogen.c energy_hydrogen.c -lm -o energy_hydrogen
+./energy_hydrogen 
+     #+end_src
+
+     #+RESULTS:
+     : a = 0.100000    E = -0.245184
+     : a = 0.200000    E = -0.269661
+     : a = 0.500000    E = -0.385636
+     : a = 1.000000    E = -0.500000
+     : a = 1.500000    E = -0.392430
+     : a = 2.000000    E = -0.080870
 
 ** Variance of the local energy
    :PROPERTIES:
