@@ -2,11 +2,12 @@
 #include <math.h>
 #include <stdio.h>
 #include <time.h>
+#include <stddef.h>  // for size_t
 #include "hydrogen.h"
 #include "qmc_stats.h"   // for ave_error
 
-void uniform_montecarlo(double a, long long int nmax, double *energy) {
-    long long int istep;
+void uniform_montecarlo(double a, size_t nmax, double *energy) {
+    size_t istep;
     double norm, r[3], w;
 
     *energy = 0.0;

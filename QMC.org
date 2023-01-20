@@ -1802,6 +1802,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <stddef.h>  // for size_t
 #include <time.h>
 #include "hydrogen.h"
 #include "qmc_stats.h"   // for ave_error
@@ -1981,11 +1982,12 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
 #include <math.h>
 #include <stdio.h>
 #include <time.h>
+#include <stddef.h>  // for size_t
 #include "hydrogen.h"
 #include "qmc_stats.h"   // for ave_error
 
-void uniform_montecarlo(double a, long long int nmax, double *energy) {
-    long long int istep;
+void uniform_montecarlo(double a, size_t nmax, double *energy) {
+    size_t istep;
     double norm, r[3], w;
 
     ,*energy = 0.0;
@@ -2593,9 +2595,10 @@ gcc hydrogen.c qmc_stats.c qmc_metropolis.c -lm -o qmc_metropolis
     z_2 &=& \sqrt{-2 \ln u_1} \sin(2 \pi u_2) 
     \end{eqnarray*}
 
-    Below is a Fortran implementation returning a Gaussian-distributed
-    n-dimensional vector $\mathbf{z}$. This will be useful for the
-    following sections.
+    Below is a Fortran and a C implementation returning a
+    Gaussian-distributed n-dimensional vector $\mathbf{z}$. This will
+    be useful for the following sections.
+    In Python, you can use the [[https://numpy.org/doc/stable/reference/random/generated/numpy.random.normal.html][~random.normal~]] function of Numpy.
 
     *Fortran*
     #+BEGIN_SRC f90 :tangle qmc_stats.f90
@@ -2633,14 +2636,48 @@ subroutine random_gauss(z,n)
 end subroutine random_gauss
     #+END_SRC
 
-    In Python, you can use the [[https://numpy.org/doc/stable/reference/random/generated/numpy.random.normal.html][~random.normal~]] function of Numpy.
-   
+    *C*
+    #+begin_src c :tangle qmc_stats.h
+void random_gauss(double* z, size_t n);
+    #+end_src
 
+    #+begin_src c :tangle qmc_stats.c
+void random_gauss(double* z, size_t n) {
+    double u[n+1];
+    double two_pi = 2.0 * acos(-1.0);
+    size_t i;
+
+    //generate random numbers
+    for (i = 0; i <= n; i++) {
+        u[i] = drand48();
+    }
+
+    if (n % 2 == 0) {
+        // n is even
+        for (i = 0; i < n; i += 2) {
+            z[i]   = sqrt(-2.0 * log(u[i]));
+            z[i+1] = z[i] * sin(two_pi * u[i+1]);
+            z[i]   = z[i] * cos(two_pi * u[i+1]);
+        }
+    } else {
+        // n is odd
+        for (i = 0; i < n-1; i += 2) {
+            z[i]   = sqrt(-2.0 * log(u[i]));
+            z[i+1] = z[i] * sin(two_pi * u[i+1]);
+            z[i]   = z[i] * cos(two_pi * u[i+1]);
+        }
+        z[n-1] = sqrt(-2.0 * log(u[n-1]));
+        z[n-1] = z[n-1] * cos(two_pi * u[n]);
+    }
+}
+
+    #+end_src
+   
 *** Exercise 1
     
      #+begin_exercise
-     If you use Fortran, copy/paste the ~random_gauss~ function in
-     a Fortran file.
+     If you use Fortran of C, copy/paste the ~random_gauss~ function in
+     the ~qmc_stats.f90~ or ~qmc_stats.c~ file.
      #+end_exercise
      
      #+begin_exercise
@@ -2648,13 +2685,13 @@ end subroutine random_gauss
      #+end_exercise
    
     *Python*
-     #+BEGIN_SRC python :tangle hydrogen.py :tangle none
+     #+BEGIN_SRC python :tangle none
 def drift(a,r):
    # TODO
      #+END_SRC
 
     *Fortran*
-     #+BEGIN_SRC f90 :tangle hydrogen.f90 :tangle none
+     #+BEGIN_SRC f90 :tangle none
 subroutine drift(a,r,b)
   implicit none
   double precision, intent(in)  :: a, r(3)
@@ -2664,6 +2701,13 @@ subroutine drift(a,r,b)
 
 end subroutine drift
      #+END_SRC
+
+     *C*
+     #+begin_src c :tangle no
+void drift(double a, double r[3], double b[3]) {
+  //TODO
+}
+     #+end_src
 
 **** Solution                                                     :solution:
     *Python*
@@ -2687,6 +2731,20 @@ subroutine drift(a,r,b)
 
 end subroutine drift
      #+END_SRC
+
+     *C*
+     #+begin_src c :tangle hydrogen.h
+void drift(double a, double r[3], double b[3]);
+     #+end_src
+
+     #+begin_src c :tangle hydrogen.c
+void drift(double a, double r[3], double b[3]) {
+  double ar_inv = -a / sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
+  for (int i = 0; i < 3; i++) {
+    b[i] = r[i] * ar_inv;
+  }
+}
+     #+end_src
 
 *** Exercise 2
 
