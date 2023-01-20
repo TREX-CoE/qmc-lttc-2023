@@ -1,44 +1,46 @@
-#include "hydrogen.h"
-#include "qmc_stats.h"
 #include <stdlib.h>
-#include <time.h>
+#include <math.h>
+#include <stdio.h>
+#include "hydrogen.h"
+#include "qmc_stats.h"   // for ave_error
 
-double uniform_montecarlo(double a, const int nmax) {
-      double r[3], energy, norm, w, rnd;
+void uniform_montecarlo(double a, long long int nmax, double *energy) {
+    long long int istep;
+    double norm, r[3], w;
 
-      norm = 0.0;
-      energy = 0.0;
-      for (int i = 0; i < nmax; ++i) {
-	    for (int j = 0; j < 3; ++j) {
-		  rnd = (double) rand() / RAND_MAX;
-		  r[j] = -5.0 + 10.0 * rnd;
-	    }
-	    w = psi(a, r, 3) * psi(a, r, 3);
-	    norm += w;
-	    energy += w * e_loc(a, r, 3);
-      }
+    *energy = 0.0;
+    norm = 0.0;
 
-      return energy / norm;
+    for (istep = 0; istep < nmax; istep++) {
+        for (int i = 0; i < 3; i++) {
+            r[i] = (double)rand() / RAND_MAX;
+        }
 
+        r[0] = -5.0 + 10.0 * r[0];
+        r[1] = -5.0 + 10.0 * r[1];
+        r[2] = -5.0 + 10.0 * r[2];
+        w = psi(a, r);
+        w = w*w;
+        *energy += w * e_loc(a, r);
+        norm += w;
+    }
+    *energy = *energy / norm;
 }
 
-int main() {
-      const double a = 1.2;
-      const long nmax = 1e5;
-      int nruns = 30;
+int main(void) {
+    double a = 1.2;
+    long long int nmax = 100000;
+    int nruns = 30;
 
-      srand(time(NULL));
+    double X[nruns];
+    double ave, err;
 
-      double x[nruns], obs[2];
+    for (int irun = 0; irun < nruns; irun++) {
+        uniform_montecarlo(a, nmax, &X[irun]);
+    }
+    ave_error(X, nruns, &ave, &err);
 
-      for (int i = 0; i < nruns; ++i) {
-	    x[i] = uniform_montecarlo(a, nmax);
-      }
+    printf("E = %f +/- %f\n", ave, err);
 
-      ave_error(x, nruns, obs);
-
-      printf("E = %.5lf +/- %.5lf\n", obs[0], obs[1]);
-      
-      return 0;
+    return 0;
 }
-

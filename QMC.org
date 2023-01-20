@@ -1487,6 +1487,7 @@ gcc hydrogen.c variance_hydrogen.c -lm -o variance_hydrogen
    :PROPERTIES:
    :header-args:python: :tangle qmc_stats.py
    :header-args:f90: :tangle qmc_stats.f90
+   :header-args:c: :tangle qmc_stats.c
    :END:
 
    To compute the statistical error, you need to perform $M$
@@ -1516,6 +1517,7 @@ gcc hydrogen.c variance_hydrogen.c -lm -o variance_hydrogen
    #+begin_exercise
    Write a function returning the average and statistical error of an
    input array.
+
    #+end_exercise
 
     *Python*
@@ -1541,8 +1543,39 @@ subroutine ave_error(x,n,ave,err)
 end subroutine ave_error
     #+END_SRC
    
+    *C*
+     #+begin_src c :tangle none
+#include <stdio.h>
+#include <math.h>
+#include <stddef.h>
+
+void ave_error(double* x, size_t n, double *ave, double *err) {
+   // TODO
+}
+     #+end_src
+
+     *Hints if you are stuck*
+     
+   Write a subroutine called ~ave_error~ that calculates the average
+   and error of a given array of real numbers. The subroutine takes in
+   three arguments: an array ~x~ of real numbers, an integer ~n~
+   representing the size of the array, and two output arguments ~ave~
+   and ~err~ representing the average and error of the array,
+   respectively.
+
+   The subroutine starts by checking if the input integer ~n~ is less
+   than 1. If it is, the subroutine stops and prints an error message.
+   If ~n~ is equal to 1, the subroutine sets the average to the first
+   element of the array and the error to zero. If ~n~ is greater than
+   1, the subroutine calculates the average of the array by dividing
+   the sum of the elements by the number of elements in the
+   array. Then it calculates the variance of the array by taking the
+   sum of the square of the difference between each element and the
+   average and dividing by ~n-1~. Finally, it calculates the error by
+   taking the square root of the variance divided by ~n~.
+
 **** Solution                                                     :solution:
-    *Python*
+     *Python*
      #+BEGIN_SRC python :results none :exports code
 #!/usr/bin/env python3
 
@@ -1563,8 +1596,8 @@ def ave_error(arr):
     return (average, error)
      #+END_SRC
 
-    *Fortran*
-        #+BEGIN_SRC f90 :exports both
+     *Fortran*
+     #+BEGIN_SRC f90 :exports both
 subroutine ave_error(x,n,ave,err)
   implicit none
 
@@ -1589,12 +1622,51 @@ subroutine ave_error(x,n,ave,err)
 
   endif
 end subroutine ave_error
-        #+END_SRC
+     #+END_SRC
    
+     *C*
+     #+begin_src c :tangle qmc_stats.h
+#include <stddef.h>
+void ave_error(double* x, size_t n, double *ave, double *err);
+     #+end_src
+
+     #+begin_src c :exports both
+#include <stdio.h>
+#include <math.h>
+#include <stddef.h>
+
+void ave_error(double* x, size_t n, double *ave, double *err) {
+  double variance;
+
+  if (n < 1) {
+    printf("n<1 in ave_error\n");
+    return;
+  } else if (n == 1) {
+    ,*ave = x[0];
+    ,*err = 0.0;
+  } else {
+    double sum = 0.0;
+    for (int i = 0; i < n; i++) {
+      sum += x[i];
+    }
+    ,*ave = sum / (double)n;
+
+    variance = 0.0;
+    for (int i = 0; i < n; i++) {
+      double x2 = x[i] - *ave;
+      variance += x2*x2;
+    }
+    variance = variance / (double)(n - 1);
+    ,*err = sqrt(variance / (double)n);
+  }
+}
+     #+end_src
+
 ** Uniform sampling in the box
    :PROPERTIES:
    :header-args:python: :tangle qmc_uniform.py
    :header-args:f90: :tangle qmc_uniform.f90
+   :header-args:c: :tangle qmc_uniform.c
    :END:
 
    We will now perform our first Monte Carlo calculation to compute the
@@ -1676,18 +1748,19 @@ print(f"E = {E} +/- {deltaE}")
      #+begin_note
      When running Monte Carlo calculations, the number of steps is
      usually very large. We expect =nmax= to be possibly larger than 2
-     billion, so we use 8-byte integers (=integer*8=) to represent it, as
-     well as the index of the current step.
+     billion. You would need to use 8-byte integers (=integer*8=) to
+     represent it, as well as the index of the current step. This
+     would imply modifying also the ~ave_error~ function.
      #+end_note
 
      #+BEGIN_SRC f90 :tangle none
 subroutine uniform_montecarlo(a,nmax,energy)
   implicit none
   double precision, intent(in)  :: a
-  integer*8       , intent(in)  :: nmax 
+  integer         , intent(in)  :: nmax 
   double precision, intent(out) :: energy
 
-  integer*8        :: istep
+  integer          :: istep
   double precision :: norm, r(3), w
 
   double precision, external :: e_loc, psi
@@ -1698,7 +1771,7 @@ end subroutine uniform_montecarlo
 program qmc
   implicit none
   double precision, parameter :: a = 1.2d0
-  integer*8       , parameter :: nmax = 100000
+  integer         , parameter :: nmax = 100000
   integer         , parameter :: nruns = 30
 
   integer          :: irun
@@ -1716,6 +1789,91 @@ end program qmc
 gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
 ./qmc_uniform
      #+end_src
+
+     *C* 
+     #+begin_note
+     To draw a uniform random number in C, you can use:
+     ~(double)rand() / RAND_MAX~. Both ~rand~ and ~RAND_MAX~ are
+     defined in the ~stdlib.h~ header.
+     #+end_note
+
+     #+begin_src c :exports code :tangle none
+#include <stdlib.h>
+#include <math.h>
+#include <stdio.h>
+#include "hydrogen.h"
+#include "qmc_stats.h"   // for ave_error
+
+void uniform_montecarlo(double a, size_t nmax, double *energy) {
+    // TODO
+}
+
+int main(void) {
+
+#define a     1.2;
+#define nmax  100000;
+#define nruns 30;
+
+    // TODO
+  
+    printf("E = %f +/- %f\n", ave, err);
+
+    return 0;
+}
+
+     #+end_src
+
+     *Hints if you are stuck*
+
+    Write first a subroutine called ~uniform_montecarlo~ that
+    calculates the energy of the Hydrogen atom using the Monte Carlo
+    method with a uniform distribution. The subroutine takes in three
+    arguments: a real number ~a~, an integer ~nmax~ representing the
+    number of Monte Carlo steps, and an output argument ~energy~
+    representing the calculated energy.
+
+    The subroutine starts by initializing the energy and normalization
+    factor to 0 and defines some variables such as ~istep~, ~norm~,
+    ~r~ and ~w~. The subroutine also makes use of two external
+    functions: ~e_loc~ and ~psi~ which were defined in previous
+    examples.
+
+    The subroutine then enters a loop that iterates for ~nmax~ times. On
+    each iteration, the subroutine generates three random numbers
+    between 0 and 1, and then uses these random numbers to calculate a
+    random point in 3D space between -5 and 5. The subroutine then
+    calls the ~psi~ function to calculate the wave function at that
+    point and the ~e_loc~ function to calculate the local energy at
+    that point. The subroutine then accumulates the energy and
+    normalization factor using the generated point and the results of
+    the ~psi~ and ~e_loc~ functions.
+
+    At the end of the loop, the subroutine calculates the final energy
+    by dividing the accumulated energy by the accumulated
+    normalization factor.
+
+    Then, write a Fortran program called ~qmc~ that uses the
+    ~uniform_montecarlo~ subroutine to estimate the energy of the
+    Hydrogen atom using the Monte Carlo method. The program starts by
+    defining some parameters: ~a~, ~nmax~, and ~nruns~.
+
+    The program then defines a variable ~irun~ which is used as a counter
+    in a loop, an array ~X~ of length ~nruns~ to store the energies
+    calculated by the ~uniform_montecarlo~ subroutine, and variables ~ave~
+    and ~err~ to store the average and error of the energies,
+    respectively.
+
+    The program then enters a loop that iterates for ~nruns~ times. On
+    each iteration, the program calls the ~uniform_montecarlo~
+    subroutine to calculate the energy of the Hydrogen atom and stores
+    the result in the ~X~ array.
+
+    After the loop, the program calls the ~ave_error~ subroutine to
+    calculate the average and error of the energies stored in the ~X~
+    array and assigns the results to ~ave~ and ~err~ variables
+    respectively.
+
+    Finally, the program prints the average and error of the energies.
 
 **** Solution                                                     :solution:
     *Python*
@@ -1808,7 +1966,64 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
      #+end_src
 
      #+RESULTS:
-     :  E =  -0.48084122147238995      +/-   2.4983775878329355E-003
+     :  E =  -0.48182164970952979      +/-   2.0344302507569819E-003
+
+     *C*
+     #+begin_src c :exports code
+#include <stdlib.h>
+#include <math.h>
+#include <stdio.h>
+#include "hydrogen.h"
+#include "qmc_stats.h"   // for ave_error
+
+void uniform_montecarlo(double a, long long int nmax, double *energy) {
+    long long int istep;
+    double norm, r[3], w;
+
+    ,*energy = 0.0;
+    norm = 0.0;
+
+    for (istep = 0; istep < nmax; istep++) {
+        for (int i = 0; i < 3; i++) {
+            r[i] = (double)rand() / RAND_MAX;
+        }
+
+        r[0] = -5.0 + 10.0 * r[0];
+        r[1] = -5.0 + 10.0 * r[1];
+        r[2] = -5.0 + 10.0 * r[2];
+        w = psi(a, r);
+        w = w*w;
+        ,*energy += w * e_loc(a, r);
+        norm += w;
+    }
+    ,*energy = *energy / norm;
+}
+
+int main(void) {
+    double a = 1.2;
+    long long int nmax = 100000;
+    int nruns = 30;
+
+    double X[nruns];
+    double ave, err;
+
+    for (int irun = 0; irun < nruns; irun++) {
+        uniform_montecarlo(a, nmax, &X[irun]);
+    }
+    ave_error(X, nruns, &ave, &err);
+
+    printf("E = %f +/- %f\n", ave, err);
+
+    return 0;
+}
+     #+end_src
+
+     #+begin_src sh :results output :exports results
+gcc hydrogen.c qmc_stats.c qmc_uniform.c -lm -o qmc_uniform
+./qmc_uniform
+     #+end_src
+     #+RESULTS:
+     : E = -0.482621 +/- 0.002111
 
 ** Metropolis sampling with $\Psi^2$
    :PROPERTIES:
