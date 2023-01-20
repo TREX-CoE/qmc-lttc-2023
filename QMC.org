@@ -3552,7 +3552,7 @@ program qmc
 end program qmc
      #+END_SRC
 
-     #+begin_src sh :results output :exports code
+     #+begin_src sh 
 gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
 ./pdmc
      #+end_src
@@ -3604,7 +3604,7 @@ int main(void) {
 
      #+end_src
      
-     #+begin_src sh :results output :exports results
+     #+begin_src sh 
 gcc hydrogen.c qmc_stats.c pdmc.c -lm -o pdmc
 ./pdmc
      #+end_src
@@ -3813,14 +3813,11 @@ program qmc
 end program qmc
      #+END_SRC
    
-     #+begin_src sh :results output :exports results
+     #+begin_src sh :results output
 gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
 ./pdmc
      #+end_src
 
-     #+RESULTS:
-     :  E =  -0.50006167719377359      +/-   7.0885190657565128E-004
-     :  A =   0.98967466666666659      +/-   7.7857419542249639E-005
 
      *C*
      #+begin_src c 
@@ -3945,7 +3942,7 @@ int main(void) {
 
      #+end_src
      
-     #+begin_src sh :results output :exports results
+     #+begin_src sh :results output
 gcc hydrogen.c qmc_stats.c pdmc.c -lm -o pdmc
 ./pdmc
      #+end_src
