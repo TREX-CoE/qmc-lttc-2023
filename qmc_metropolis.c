@@ -1,73 +1,70 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h> // for size_t
+#include <math.h>
+#include <time.h>
 #include "hydrogen.h"
 #include "qmc_stats.h"
-#include <stdlib.h>
-#include <time.h>
 
-void metropolis_montecarlo(double a, const int nmax, double dt,
-			   double *energy, double *accept) {
-      int n_accept;
-      double r_old[3], r_new[3], psi_old, psi_new, rnd;
-      double aval, u;
+void metropolis_montecarlo(double a, size_t nmax, double dt,
+                           double *energy, double *accep)
+{
+    double r_old[3], r_new[3], psi_old, psi_new, v, ratio;
+    size_t n_accep = 0;
 
-      // Initial position
-      for (int j = 0; j < 3; ++j) {
-	    rnd = (double) rand() / RAND_MAX;
-	    r_old[j] = dt * (2.0 * rnd - 1.0);
-      }
-      psi_old = psi(a, r_old, 3) * psi(a, r_old, 3);
+    *energy = 0.0;
 
-      *energy = 0.0;
-      *accept = 0.0;
-      n_accept = 0;
-      for (int i = 0; i < nmax; ++i) {
-	    // Compute and accumulate the local energy
-	    *energy += e_loc(a, r_old, 3);
+    for (int i = 0; i < 3; i++) {
+        r_old[i] = dt * (2.0*drand48() - 1.0);
+    }
+    psi_old = psi(a, r_old);
 
-	    // Compute new position
-	    for (int j = 0; j < 3; ++j) {
-		 rnd = (double) rand() / RAND_MAX;
-		 r_new[j] = r_old[j] + dt * (2.0 * rnd - 1.0);
-	    }
+    for (size_t istep = 0; istep < nmax; istep++) {
+        *energy += e_loc(a, r_old);
 
-	    // New WF and acceptance probability
-	    psi_new = psi(a, r_new, 3) * psi(a, r_new, 3);
-	    aval = psi_new / psi_old;
+        for (int i = 0; i < 3; i++) {
+            r_new[i] = r_old[i] + dt * (2.0*drand48() - 1.0);
+        }
 
-	    u = (double) rand() / RAND_MAX;
+        psi_new = psi(a, r_new);
 
-	    if (u <= aval) {
-		  for (int j = 0; j < 3; ++j) {
-			r_old[j] = r_new[j];
-		  }
-		  psi_old = psi_new;
-		  n_accept += 1;
+        ratio = pow(psi_new / psi_old,2);
+        v = drand48();
 
-	    }
-
-      }
-      *energy /= nmax;
-      *accept = (double) n_accept / nmax;
+        if (v <= ratio) {
+            n_accep++;
+            for (int i = 0; i < 3; i++) {
+                r_old[i] = r_new[i];
+            }
+            psi_old = psi_new;
+        }
+    }
+    *energy = *energy / (double) nmax;
+    *accep = (double) n_accep / (double) nmax;
 }
 
-int main() {
-      const double a = 1.2;
-      const double dt = 1.0;
-      const long nmax = 1e5;
-      int nruns = 30;
+int main(void) {
 
-      srand(time(NULL));
+#define a      1.2
+#define nmax   100000
+#define dt     1.0
+#define nruns  30
 
-      double x[nruns], y[nruns], obs[2];
+    double X[nruns];
+    double Y[nruns];
+    double ave, err;
 
-      for (int i = 0; i < nruns; ++i) {
-	    metropolis_montecarlo(a, nmax, dt, &x[i], &y[i]);
-      }
+    srand48(time(NULL));
 
-      ave_error(x, nruns, obs);
-      printf("E = %.5lf +/- %.5lf\n", obs[0], obs[1]);
+    for (size_t irun = 0; irun < nruns; irun++) {
+        metropolis_montecarlo(a, nmax, dt, &X[irun], &Y[irun]);
+    }
 
-      ave_error(y, nruns, obs);
-      printf("A = %.5lf +/- %.5lf\n", obs[0], obs[1]);
-      
-      return 0;
+    ave_error(X, nruns, &ave, &err);
+    printf("E = %f +/- %f\n", ave, err);
+
+    ave_error(Y, nruns, &ave, &err);
+    printf("A = %f +/- %f\n", ave, err);
+
+    return 0;
 }

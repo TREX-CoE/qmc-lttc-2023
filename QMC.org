@@ -1547,7 +1547,7 @@ end subroutine ave_error
      #+begin_src c :tangle none
 #include <stdio.h>
 #include <math.h>
-#include <stddef.h>
+#include <stddef.h> // for size_t
 
 void ave_error(double* x, size_t n, double *ave, double *err) {
    // TODO
@@ -1626,14 +1626,14 @@ end subroutine ave_error
    
      *C*
      #+begin_src c :tangle qmc_stats.h
-#include <stddef.h>
+#include <stddef.h> // for size_t
 void ave_error(double* x, size_t n, double *ave, double *err);
      #+end_src
 
      #+begin_src c :exports both
 #include <stdio.h>
 #include <math.h>
-#include <stddef.h>
+#include <stddef.h> // for size_t
 
 void ave_error(double* x, size_t n, double *ave, double *err) {
   double variance;
@@ -1793,14 +1793,16 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
      *C* 
      #+begin_note
      To draw a uniform random number in C, you can use:
-     ~(double)rand() / RAND_MAX~. Both ~rand~ and ~RAND_MAX~ are
-     defined in the ~stdlib.h~ header.
+     ~drand48()~, which is defined in the ~stdlib.h~ header. To
+     initialize randomly the generator, use ~srand48(time(NULL))~
+     using the ~time~ function from ~time.h~.
      #+end_note
 
      #+begin_src c :exports code :tangle none
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <time.h>
 #include "hydrogen.h"
 #include "qmc_stats.h"   // for ave_error
 
@@ -1810,9 +1812,11 @@ void uniform_montecarlo(double a, size_t nmax, double *energy) {
 
 int main(void) {
 
-#define a     1.2;
-#define nmax  100000;
-#define nruns 30;
+#define a     1.2
+#define nmax  100000
+#define nruns 30
+
+    srand48(time(NULL));
 
     // TODO
   
@@ -1907,6 +1911,9 @@ E, deltaE = ave_error(X)
 print(f"E = {E} +/- {deltaE}")
      #+END_SRC
 
+     #+RESULTS:
+     : E = -0.4793311279357434 +/- 0.002563797463053474
+
     *Fortran*
      #+BEGIN_SRC f90 :exports code
 subroutine uniform_montecarlo(a,nmax,energy)
@@ -1966,13 +1973,14 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
      #+end_src
 
      #+RESULTS:
-     :  E =  -0.48182164970952979      +/-   2.0344302507569819E-003
+     :  E =  -0.47918925027812115      +/-   2.8073517099101216E-003
 
      *C*
      #+begin_src c :exports code
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <time.h>
 #include "hydrogen.h"
 #include "qmc_stats.h"   // for ave_error
 
@@ -1985,7 +1993,7 @@ void uniform_montecarlo(double a, long long int nmax, double *energy) {
 
     for (istep = 0; istep < nmax; istep++) {
         for (int i = 0; i < 3; i++) {
-            r[i] = (double)rand() / RAND_MAX;
+            r[i] = drand48();
         }
 
         r[0] = -5.0 + 10.0 * r[0];
@@ -2000,14 +2008,17 @@ void uniform_montecarlo(double a, long long int nmax, double *energy) {
 }
 
 int main(void) {
-    double a = 1.2;
-    long long int nmax = 100000;
-    int nruns = 30;
+
+#define a     1.2
+#define nmax  100000
+#define nruns 30
 
     double X[nruns];
     double ave, err;
 
-    for (int irun = 0; irun < nruns; irun++) {
+    srand48(time(NULL));
+
+    for (size_t irun = 0; irun < nruns; irun++) {
         uniform_montecarlo(a, nmax, &X[irun]);
     }
     ave_error(X, nruns, &ave, &err);
@@ -2023,12 +2034,13 @@ gcc hydrogen.c qmc_stats.c qmc_uniform.c -lm -o qmc_uniform
 ./qmc_uniform
      #+end_src
      #+RESULTS:
-     : E = -0.482621 +/- 0.002111
+     : E = -0.479050 +/- 0.002540
 
 ** Metropolis sampling with $\Psi^2$
    :PROPERTIES:
    :header-args:python: :tangle qmc_metropolis.py
    :header-args:f90: :tangle qmc_metropolis.f90
+   :header-args:c: :tangle qmc_metropolis.c
    :END:
 
    We will now use the square of the wave function to sample random
@@ -2104,7 +2116,6 @@ gcc hydrogen.c qmc_stats.c qmc_uniform.c -lm -o qmc_uniform
     All samples should be kept, from both accepted /and/ rejected moves.
    #+end_note
    
-   
 *** Optimal step size
     
     If the box is infinitely small, the ratio will be very close
@@ -2127,7 +2138,6 @@ gcc hydrogen.c qmc_stats.c qmc_uniform.c -lm -o qmc_uniform
     Below, we use the symbol $\delta t$ to denote $\delta L$ since we will use
     the same variable later on to store a time step.
    #+end_note
-   
    
 *** Exercise
     
@@ -2172,8 +2182,6 @@ X = [ x for (_, x) in X0 ]
 A, deltaA = ave_error(X)
 print(f"A = {A} +/- {deltaA}")
      #+END_SRC
-
-     #+RESULTS:
 
     *Fortran*
      #+BEGIN_SRC f90 :tangle none
@@ -2220,12 +2228,50 @@ program qmc
 end program qmc
      #+END_SRC
 
-     #+begin_src sh :results output :exports both
-gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
-./qmc_metropolis
-     #+end_src
+     *C*
+     #+begin_src c :tangle none
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h> // for size_t
+#include <time.h>
+#include <math.h>
+#include "hydrogen.h"
+#include "qmc_stats.h"
 
-**** Solution                                                     :solution:
+void metropolis_montecarlo(double a, size_t nmax, double dt,
+                           double *energy, double *accep)
+{
+    // TODO
+}
+
+int main(void) {
+
+#define a     1.2
+#define nmax  100000
+#define dt    //TODO
+#define nruns 30
+
+    double energy[nruns];
+    double accep[nruns];
+    double ave, err;
+
+    srand48(time(NULL));
+
+    for (size_t irun = 0; irun < nruns; irun++) {
+        metropolis_montecarlo(a, nmax, dt, energy, accep);
+    }
+
+    ave_error(energy, nruns, &ave, &err);
+    printf("E = %f +/- %f\n", ave, err);
+
+    ave_error(accep, nruns, &ave, &err);
+    printf("A = %f +/- %f\n", ave, err);
+
+    return 0;
+}
+
+     #+end_src     
+**** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results output :exports both
 #!/usr/bin/env python3
@@ -2358,8 +2404,92 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
 ./qmc_metropolis
      #+end_src
      #+RESULTS:
-     :  E =  -0.47948142754168033      +/-   4.8410177863919307E-004
-     :  A =   0.50762633333333318      +/-   3.4601756760043725E-004
+     :  E =  -0.48092254316047378      +/-   4.7930979676354796E-004
+     :  A =   0.50798666666666670      +/-   3.7480365230047844E-004
+
+     *C*
+     #+begin_src c
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h> // for size_t
+#include <math.h>
+#include <time.h>
+#include "hydrogen.h"
+#include "qmc_stats.h"
+
+void metropolis_montecarlo(double a, size_t nmax, double dt,
+                           double *energy, double *accep)
+{
+    double r_old[3], r_new[3], psi_old, psi_new, v, ratio;
+    size_t n_accep = 0;
+
+    ,*energy = 0.0;
+
+    for (int i = 0; i < 3; i++) {
+        r_old[i] = dt * (2.0*drand48() - 1.0);
+    }
+    psi_old = psi(a, r_old);
+
+    for (size_t istep = 0; istep < nmax; istep++) {
+        ,*energy += e_loc(a, r_old);
+
+        for (int i = 0; i < 3; i++) {
+            r_new[i] = r_old[i] + dt * (2.0*drand48() - 1.0);
+        }
+
+        psi_new = psi(a, r_new);
+
+        ratio = pow(psi_new / psi_old,2);
+        v = drand48();
+
+        if (v <= ratio) {
+            n_accep++;
+            for (int i = 0; i < 3; i++) {
+                r_old[i] = r_new[i];
+            }
+            psi_old = psi_new;
+        }
+    }
+    ,*energy = *energy / (double) nmax;
+    ,*accep = (double) n_accep / (double) nmax;
+}
+
+int main(void) {
+
+#define a      1.2
+#define nmax   100000
+#define dt     1.0
+#define nruns  30
+
+    double X[nruns];
+    double Y[nruns];
+    double ave, err;
+
+    srand48(time(NULL));
+
+    for (size_t irun = 0; irun < nruns; irun++) {
+        metropolis_montecarlo(a, nmax, dt, &X[irun], &Y[irun]);
+    }
+
+    ave_error(X, nruns, &ave, &err);
+    printf("E = %f +/- %f\n", ave, err);
+
+    ave_error(Y, nruns, &ave, &err);
+    printf("A = %f +/- %f\n", ave, err);
+
+    return 0;
+}
+
+     #+end_src     
+
+     #+begin_src sh :results output :exports results
+gcc hydrogen.c qmc_stats.c qmc_metropolis.c -lm -o qmc_metropolis
+./qmc_metropolis
+     #+end_src
+
+     #+RESULTS:
+     : E = -0.479518 +/- 0.000466
+     : A = 0.507560 +/- 0.000353
 
 ** Generalized Metropolis algorithm
    :PROPERTIES:

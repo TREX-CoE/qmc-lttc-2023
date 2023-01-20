@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <time.h>
 #include "hydrogen.h"
 #include "qmc_stats.h"   // for ave_error
 
@@ -13,7 +14,7 @@ void uniform_montecarlo(double a, long long int nmax, double *energy) {
 
     for (istep = 0; istep < nmax; istep++) {
         for (int i = 0; i < 3; i++) {
-            r[i] = (double)rand() / RAND_MAX;
+            r[i] = drand48();
         }
 
         r[0] = -5.0 + 10.0 * r[0];
@@ -28,14 +29,17 @@ void uniform_montecarlo(double a, long long int nmax, double *energy) {
 }
 
 int main(void) {
-    double a = 1.2;
-    long long int nmax = 100000;
-    int nruns = 30;
+
+#define a     1.2
+#define nmax  100000
+#define nruns 30
 
     double X[nruns];
     double ave, err;
 
-    for (int irun = 0; irun < nruns; irun++) {
+    srand48(time(NULL));
+
+    for (size_t irun = 0; irun < nruns; irun++) {
         uniform_montecarlo(a, nmax, &X[irun]);
     }
     ave_error(X, nruns, &ave, &err);
