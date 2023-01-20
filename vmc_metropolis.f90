@@ -1,4 +1,4 @@
-subroutine variational_montecarlo(a,dt,nmax,energy,accep)
+subroutine variational_montecarlo(a,nmax,dt,energy,accep)
   implicit none
   double precision, intent(in)  :: a, dt
   integer*8       , intent(in)  :: nmax 
@@ -83,7 +83,7 @@ program qmc
   double precision :: ave, err
 
   do irun=1,nruns
-     call variational_montecarlo(a,dt,nmax,X(irun),accep(irun))
+     call variational_montecarlo(a,nmax,dt,X(irun),accep(irun))
   enddo
 
   call ave_error(X,nruns,ave,err)
