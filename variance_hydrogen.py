@@ -4,9 +4,7 @@ import numpy as np
 from hydrogen import e_loc, psi
 
 interval = np.linspace(-5,5,num=50)
-
 delta = (interval[1]-interval[0])**3
-
 r = np.array([0.,0.,0.])
 
 for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
