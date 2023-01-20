@@ -36,7 +36,7 @@
 * Introduction
 
   This website contains the QMC tutorial of the 2023 LTTC winter school
-  [[https://www.irsamc.ups-tlse.fr/lttc/Luchon][Tutorials in Theoretical Chemistry]].
+  Tutorials in Theoretical Chemistry.
 
   We propose different exercises to understand quantum Monte Carlo (QMC)
   methods. In the first section, we start with the computation of the energy of a
@@ -50,7 +50,7 @@
   we use here to estimate the exact energy of the hydrogen atom and of the H_2 molecule, 
   starting from an approximate wave function. 
 
-  Code examples will be given in Python3 and Fortran. You can use
+  Code examples will be given in Python3, C and Fortran. You can use
   whatever language you prefer to write the programs.
 
   We consider the stationary solution of the Schrödinger equation, so
@@ -90,16 +90,17 @@
   arbitrary function $f(x)$ with respect to a probability density
   function $P(x)$ is given by
 
-  $$ \langle f \rangle_P = \int_{-\infty}^\infty \frac{f(x)}{P(x)}\, P(x)\, dx = \int_{-\infty}^\infty \frac{f(x)}{P(x)}\, dP(x), $$
+# $$ \langle f \rangle_P = \int_{-\infty}^\infty \frac{f(x)}{P(x)}\, P(x)\, dx = \int_{-\infty}^\infty \frac{f(x)}{P(x)}\, dP(x), $$
+  $$ \langle f \rangle_P = \int_{-\infty}^\infty f(x)\, dx $$
 
   where a probability density function $P(x)$ is non-negative
   and integrates to one:
 
   $$ \int_{-\infty}^\infty P(x)\,dx = 1. $$
 
-  and $dP(x)$ satisfies:
+# and $dP(x)$ satisfies:
 
-  $$ dP(x) = \int_{0}^x P(y)\,dy . $$
+# $$ dP(x) = \int_{0}^x P(y)\,dy . $$
 
   Similarly, we can view the energy of a system, $E$, as the expected value of the local energy with respect to
   a probability density $P(\mathbf{r})$ defined in 3$N$ dimensions:
@@ -158,15 +159,20 @@
 *** Exercise 1
 
     #+begin_exercise
-    Write a function which computes the potential at $\mathbf{r}$.
-    The function accepts a 3-dimensional vector =r= as input argument
-    and returns the scalar potential.
+    Write a function called ~potential~ that takes a single argument
+    ~r~, which is an array of 3 double precision numbers. The function
+    calculates the distance from the origin using the Euclidean
+    distance formula, and then calculates the potential using this
+    distance.
+    If the distance is 0, the program stops and prints an error message.
+    If the distance is greater than 0, the potential is calculated as 
+
+    \[
+    \mathbf{r}=\left( \begin{array}{c} x \\ y\\ z\end{array}
+    \right), \text{ so } V(\mathbf{r}) = -\frac{1}{\sqrt{x^2 + y^2 + z^2}}
+    \]
     #+end_exercise
 
-    $\mathbf{r}=\left( \begin{array}{c} x \\ y\\ z\end{array} \right)$, so
-    $$
-    V(\mathbf{r}) = -\frac{1}{\sqrt{x^2 + y^2 + z^2}}
-    $$
 
     *Python*
      #+BEGIN_SRC python :results none :tangle none
@@ -187,6 +193,18 @@ double precision function potential(r)
 
 end function potential
      #+END_SRC
+
+     *C*
+     #+begin_src c :tangle none
+#include <stdio.h>   // printf
+#include <math.h>    // sqrt
+#include <stdlib.h>  // exit
+
+double potential(double r[3]) {
+  // TODO
+}
+
+     #+end_src
 
 **** Solution                                                      :solution:
     *Python*
@@ -219,11 +237,33 @@ double precision function potential(r)
 end function potential
      #+END_SRC
 
+     *C*
+     #+begin_src c :tangle none
+#include <stdio.h>   // printf
+#include <math.h>    // sqrt
+#include <stdlib.h>  // exit
+
+double potential(double r[3]) {
+  double distance;
+
+  distance = sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
+
+  if (distance > 0) {
+    return -1.0 / distance;
+  } else {
+    printf("Error: potential at r=0 diverges\n");
+    exit(1);
+  }
+}
+
+     #+end_src
+
 *** Exercise 2
     #+begin_exercise
-    Write a function which computes the wave function at $\mathbf{r}$.
-    The function accepts a scalar =a= and a 3-dimensional vector =r= as
-    input arguments, and returns a scalar.
+    Write a function called ~psi~ that takes two arguments: ~a~ which is a
+    double precision number, and ~r~ which is an array of 3 double
+    precision numbers. The function calculates and returns the value of the wave
+    function at the given point $\mathbf{r}$.
     #+end_exercise
     
     *Python*
@@ -243,6 +283,13 @@ double precision function psi(a, r)
 end function psi
      #+END_SRC
      
+     *C*
+     #+begin_src c :tangle none
+double psi(double a, double r[3]) {
+  // TODO
+}
+     #+end_src
+
 **** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results none
@@ -260,14 +307,32 @@ double precision function psi(a, r)
 end function psi
      #+END_SRC
      
+     *C*
+     #+begin_src c :tangle none
+double psi(double a, double r[3]) {
+  double distance;
+
+  distance = sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
+
+  return exp(-a * distance);
+}
+     #+end_src
+     
 *** Exercise 3
     #+begin_exercise
-    Write a function which computes the local kinetic energy at $\mathbf{r}$.
-    The function accepts =a= and =r= as input arguments and returns the
-    local kinetic energy.
+    Write a function called ~kinetic~ that takes two arguments: ~a~
+    which is a double precision number, and ~r~ which is an array of 3
+    double precision numbers. The function calculates the local kinetic energy
+    at the given point $\mathbf{r}$.
+    
+    It first calculates the distance from the origin using the Euclidean
+    distance formula. If the distance is greater than 0, the kinetic
+    energy is calculated using the formula given below. If the distance is 0,
+    the program stops and prints an error message.
     #+end_exercise
 
-    The local kinetic energy is defined as $$T_L(\mathbf{r}) = -\frac{1}{2}\frac{\Delta \Psi(\mathbf{r})}{\Psi(\mathbf{r})}.$$
+    The local kinetic energy is defined as
+    $$T_L(\mathbf{r}) = -\frac{1}{2}\frac{\Delta \Psi(\mathbf{r})}{\Psi(\mathbf{r})}.$$
      
     We differentiate $\Psi$ with respect to $x$:
      
@@ -314,6 +379,12 @@ double precision function kinetic(a,r)
 end function kinetic
      #+END_SRC
 
+     #+begin_src c :tangle none
+double kinetic(double a, double r[3]) {
+  //TODO
+}
+     #+end_src
+
 **** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results none
@@ -345,12 +416,32 @@ double precision function kinetic(a,r)
 end function kinetic
      #+END_SRC
 
+     *C*
+     #+begin_src c :tangle none
+double kinetic(double a, double r[3]) {
+  double distance;
+
+  distance = sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
+
+  if (distance > 0) {
+    return a * (1.0 / distance - 0.5 * a);
+  } else {
+    printf("Error: kinetic energy diverges at r=0\n");
+    exit(1);
+  }
+}
+     #+end_src
+
 *** Exercise 4
     #+begin_exercise
-    Write a function which computes the local energy at $\mathbf{r}$,
-    using the previously defined functions.
-    The function accepts =a= and =r= as input arguments and returns the
-    local kinetic energy.
+    Write a function called ~e_loc~ that takes two arguments: ~a~
+    which is a double precision number and ~r~ which is an array of 3
+    double precision numbers. The function calculates the local energy at
+    the given point $\mathbf{r}$.
+
+    It uses two functions ~kinetic~ and ~potential~ to calculate the
+    kinetic energy and potential energy respectively and add them to
+    get the local energy.
     #+end_exercise
    
     $$
@@ -364,7 +455,7 @@ def e_loc(a,r):
     #TODO
      #+END_SRC
 
-    *Fortran*
+     *Fortran*
 
     #+begin_note
     When you call a function in Fortran, you need to declare its
@@ -388,6 +479,13 @@ double precision function e_loc(a,r)
 end function e_loc
     #+END_SRC
    
+    *C*
+     #+begin_src c :tangle none
+double e_loc(double a, double r[3]) {
+  // TODO
+}
+     #+end_src
+
 **** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results none
@@ -409,6 +507,12 @@ double precision function e_loc(a,r)
 end function e_loc
      #+END_SRC
    
+     *C*
+     #+begin_src c :tangle none
+double e_loc(double a, double r[3]) {
+  return kinetic(a, r) + potential(r);
+}
+     #+end_src
 *** Exercise 5
 
     #+begin_exercise
