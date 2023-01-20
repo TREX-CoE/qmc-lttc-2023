@@ -2854,7 +2854,7 @@ int main(void) {
 
 #define a      1.2
 #define nmax   100000
-#define dt     1.0
+#define dt     // TODO
 #define nruns  30
 
     double X[nruns];
@@ -3457,11 +3457,11 @@ gcc hydrogen.c qmc_stats.c vmc_metropolis.c -lm -o vmc_metropolis
    - The accept/reject step (steps 9-12 in the algorithm) is in principle not needed for the correctness of 
      the DMC algorithm. However, its use reduces significantly the time-step error.
    
-   
 ** Hydrogen atom
   :PROPERTIES:
   :header-args:python: :tangle pdmc.py
   :header-args:f90: :tangle pdmc.f90
+  :header-args:c: :tangle pdmc.c
   :END:
    
 *** Exercise 
@@ -3506,7 +3506,7 @@ print(f"A = {A} +/- {deltaA}")
 
     *Fortran*
      #+BEGIN_SRC f90 :tangle none
-subroutine pdmc(a, dt, nmax, energy, accep, tau, E_ref)
+subroutine pdmc(a, nmax, dt, energy, accep, tau, E_ref)
   implicit none
   double precision, intent(in)  :: a, dt, tau
   integer*8       , intent(in)  :: nmax 
@@ -3540,7 +3540,7 @@ program qmc
   double precision :: ave, err
 
   do irun=1,nruns
-     call pdmc(a, dt, nmax, X(irun), accep(irun), tau, E_ref)
+     call pdmc(a, nmax, dt, X(irun), accep(irun), tau, E_ref)
   enddo
 
   call ave_error(X,nruns,ave,err)
@@ -3557,6 +3557,57 @@ gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
 ./pdmc
      #+end_src
 
+     *C*
+     #+begin_src c :tangle none
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h> // for size_t
+#include <math.h>
+#include <time.h>
+#include "hydrogen.h"
+#include "qmc_stats.h"
+
+void pdmc(double a, size_t nmax, double dt, double *energy, double *accep,
+          double tau, double e_ref)
+{
+  // TODO
+}
+
+
+int main(void) {
+
+#define a      1.2
+#define nmax   100000
+#define dt     0.05
+#define tau    100.0
+#define e_ref  -0.5
+#define nruns  30
+
+    double X[nruns];
+    double Y[nruns];
+    double ave, err;
+
+    srand48(time(NULL));
+
+    for (size_t irun = 0; irun < nruns; irun++) {
+        pdmc(a, nmax, dt, &X[irun], &Y[irun], tau, e_ref);
+    }
+
+    ave_error(X, nruns, &ave, &err);
+    printf("E = %f +/- %f\n", ave, err);
+
+    ave_error(Y, nruns, &ave, &err);
+    printf("A = %f +/- %f\n", ave, err);
+
+    return 0;
+}
+
+     #+end_src
+     
+     #+begin_src sh :results output :exports results
+gcc hydrogen.c qmc_stats.c pdmc.c -lm -o pdmc
+./pdmc
+     #+end_src
 **** Solution                                                      :solution:
 
      *Python*
@@ -3640,8 +3691,8 @@ print(f"A = {A} +/- {deltaA}")
      #+END_SRC
 
      #+RESULTS:
-     : E = -0.500188803288012 +/- 0.0010615739297642462
-     : A = 0.9896496666666668 +/- 7.688845979106312e-05
+     : E = -0.50036935994773 +/- 0.0014489649023857437
+     : A = 0.9895569999999999 +/- 7.485027199944374e-05
 
      *Fortran* 
      #+BEGIN_SRC f90
@@ -3768,11 +3819,142 @@ gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
      #+end_src
 
      #+RESULTS:
-     :  E =  -0.49963953547336709      +/-   6.8755513992017491E-004
-     :  A =   0.98963533333333342      +/-   6.3052128284666221E-005
+     :  E =  -0.50006167719377359      +/-   7.0885190657565128E-004
+     :  A =   0.98967466666666659      +/-   7.7857419542249639E-005
+
+     *C*
+     #+begin_src c 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h> // for size_t
+#include <math.h>
+#include <time.h>
+#include "hydrogen.h"
+#include "qmc_stats.h"
+
+void pdmc(double a, size_t nmax, double dt, double *energy, double *accep,
+          double tau, double e_ref)
+{
+    double chi[3], d2_old, prod, u;
+    double psi_old, psi_new, d2_new, argexpo, q;
+    double r_old[3], r_new[3];
+    double d_old[3], d_new[3];
+    size_t istep, n_accep;
+    double e, w, tau_current, norm;
+
+    double sq_dt = sqrt(dt);
+
+    // Initialization
+    ,*energy = 0.0;
+    n_accep = 0;
+    norm = 0.0;
+
+    w = 1.0;
+    tau_current = 0.0;
+
+    random_gauss(r_old, 3);
+
+    drift(a, r_old, d_old);
+    d2_old = d_old[0]*d_old[0] +
+             d_old[1]*d_old[1] +
+             d_old[2]*d_old[2];
+
+    psi_old = psi(a, r_old);
+
+    for (istep = 0; istep < nmax; istep++) {
+        e = e_loc(a, r_old);
+        w *= exp(-dt*(e-e_ref));
+
+        norm += w;
+        ,*energy += w*e;
+
+        tau_current += dt;
+
+        // Reset when tau is reached
+        if (tau_current > tau) {
+          w = 1.0;
+          tau_current = 0.0;
+        }
+
+        random_gauss(chi, 3);
+        for (int i = 0; i < 3; i++) {
+            r_new[i] = r_old[i] + dt*d_old[i] + chi[i]*sq_dt;
+        }
+
+        drift(a, r_new, d_new);
+        d2_new = d_new[0]*d_new[0] +
+                 d_new[1]*d_new[1] +
+                 d_new[2]*d_new[2];
+
+        psi_new = psi(a, r_new);
+
+        // Metropolis
+        prod = (d_new[0] + d_old[0])*(r_new[0] - r_old[0]) +
+               (d_new[1] + d_old[1])*(r_new[1] - r_old[1]) +
+               (d_new[2] + d_old[2])*(r_new[2] - r_old[2]);
+
+        argexpo = 0.5 * (d2_new - d2_old)*dt + prod;
+
+        q = psi_new / psi_old;
+        q = exp(-argexpo) * q*q;
+
+        u = drand48();
+
+        if (u <= q) {
+            n_accep++;
+            for (int i = 0; i < 3; i++) {
+                r_old[i] = r_new[i];
+                d_old[i] = d_new[i];
+            }
+            d2_old = d2_new;
+            psi_old = psi_new;
+        }
+    }
+    ,*energy = *energy / norm;
+    ,*accep = (double) n_accep / (double) nmax;
+}
 
 
-   
+int main(void) {
+
+#define a      1.2
+#define dt     0.05
+#define e_ref  -0.5
+#define tau    100.0
+#define nmax   100000
+#define nruns  30
+
+    double X[nruns];
+    double Y[nruns];
+    double ave, err;
+
+    srand48(time(NULL));
+
+    for (size_t irun = 0; irun < nruns; irun++) {
+        pdmc(a, nmax, dt, &X[irun], &Y[irun], tau, e_ref);
+    }
+
+    ave_error(X, nruns, &ave, &err);
+    printf("E = %f +/- %f\n", ave, err);
+
+    ave_error(Y, nruns, &ave, &err);
+    printf("A = %f +/- %f\n", ave, err);
+
+    return 0;
+}
+
+     #+end_src
+     
+     #+begin_src sh :results output :exports results
+gcc hydrogen.c qmc_stats.c pdmc.c -lm -o pdmc
+./pdmc
+     #+end_src
+
+     #+RESULTS:
+     : E = -0.500031 +/- 0.000805
+     : A = 0.989511 +/- 0.000070
+     
+
 * Project
 
   Change your PDMC code for one of the following:
@@ -3782,7 +3964,6 @@ gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
   And compute the ground state energy.
   
       
-  
 * Schedule                                                         :noexport:
 
  |------------------------------+---------|

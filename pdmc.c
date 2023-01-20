@@ -1,111 +1,118 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h> // for size_t
+#include <math.h>
+#include <time.h>
 #include "hydrogen.h"
 #include "qmc_stats.h"
 
-void pdmc(double a, const int nmax, double dt,
-	  double *energy, double *accept, double tau, double e_ref) {
-      int n_accept;
-      double r_old[3], r_new[3], psi_old, psi_new;
-      double d_old[3], d_new[3], d2_old, d2_new;
-      double rnd[3], fact_a, fact_b, sq_dt, q, u;
-      double e, w, tau_current, norma;
+void pdmc(double a, size_t nmax, double dt, double *energy, double *accep,
+          double tau, double e_ref)
+{
+    double chi[3], d2_old, prod, u;
+    double psi_old, psi_new, d2_new, argexpo, q;
+    double r_old[3], r_new[3];
+    double d_old[3], d_new[3];
+    size_t istep, n_accep;
+    double e, w, tau_current, norm;
 
-      sq_dt = sqrt(dt);
+    double sq_dt = sqrt(dt);
 
-      // Initial position
-      random_gauss(r_old, 3);
+    // Initialization
+    *energy = 0.0;
+    n_accep = 0;
+    norm = 0.0;
 
-      drift(a, r_old, d_old, 3);
-      d2_old = 0.0;
-      for (int j = 0; j < 3; ++j) {
-	    d2_old += d_old[j] * d_old[j];
-      }
+    w = 1.0;
+    tau_current = 0.0;
 
-      psi_old = psi(a, r_old, 3);
+    random_gauss(r_old, 3);
 
-      *energy = 0.0;
-      *accept = 0.0;
-      n_accept = 0;
-      w = 1.0;
-      tau_current = 0.0;
-      norma = 0.0;
-      for (int i = 0; i < nmax; ++i) {
-	    // Compute local energy and weight
-	    e = e_loc(a, r_old, 3);
-	    w = w * exp(-dt * (e - e_ref));
+    drift(a, r_old, d_old);
+    d2_old = d_old[0]*d_old[0] +
+             d_old[1]*d_old[1] +
+             d_old[2]*d_old[2];
 
-	    // Accumulate local energy and norm
-	    norma = norma + w; 
-	    *energy += w * e;
+    psi_old = psi(a, r_old);
 
-	    // Increase time and reset if threshold reached
-	    tau_current += dt;
-	    if (tau_current > tau) {
-		  w = 1.0;
-		  tau_current = 0.0;
-	    }
+    for (istep = 0; istep < nmax; istep++) {
+        e = e_loc(a, r_old);
+        w *= exp(-dt*(e-e_ref));
 
-	    // Compute new position (correct variance of sampled Gaussian)
-	    random_gauss(rnd, 3);
-	    for (int j = 0; j < 3; ++j) {
-		  r_new[j] = r_old[j] + dt * d_old[j] + rnd[j] * sq_dt;
-	    }
+        norm += w;
+        *energy += w*e;
 
-	    // New WF and acceptance probability
-            drift(a, r_new, d_new, 3);
-	    d2_new = 0.0;
-            for (int j = 0; j < 3; ++j) {
-		  d2_new += d_new[j] * d_new[j];
+        tau_current += dt;
+
+        // Reset when tau is reached
+        if (tau_current > tau) {
+          w = 1.0;
+          tau_current = 0.0;
+        }
+
+        random_gauss(chi, 3);
+        for (int i = 0; i < 3; i++) {
+            r_new[i] = r_old[i] + dt*d_old[i] + chi[i]*sq_dt;
+        }
+
+        drift(a, r_new, d_new);
+        d2_new = d_new[0]*d_new[0] +
+                 d_new[1]*d_new[1] +
+                 d_new[2]*d_new[2];
+
+        psi_new = psi(a, r_new);
+
+        // Metropolis
+        prod = (d_new[0] + d_old[0])*(r_new[0] - r_old[0]) +
+               (d_new[1] + d_old[1])*(r_new[1] - r_old[1]) +
+               (d_new[2] + d_old[2])*(r_new[2] - r_old[2]);
+
+        argexpo = 0.5 * (d2_new - d2_old)*dt + prod;
+
+        q = psi_new / psi_old;
+        q = exp(-argexpo) * q*q;
+
+        u = drand48();
+
+        if (u <= q) {
+            n_accep++;
+            for (int i = 0; i < 3; i++) {
+                r_old[i] = r_new[i];
+                d_old[i] = d_new[i];
             }
-
-	    psi_new = psi(a, r_new, 3);
-
-	    // Compute the ratio of probabilities q
-	    fact_b = 0.0;
-	    for (int j = 0; j < 3; ++j) {
-		  fact_b += (d_new[j] + d_old[j]) * (r_new[j] - r_old[j]);
-	    }
-	    fact_a = 0.5 * dt * (d2_new - d2_old) + fact_b;
-
-	    q = psi_new / psi_old;
-	    q = exp(-fact_a) * q * q;
-
-	    u = (double) rand() / RAND_MAX;
-
-	    if (u <= q) {
-		  n_accept += 1;
-		  for (int j = 0; j < 3; ++j) {
-			r_old[j] = r_new[j];
-			d_old[j] = d_new[j];
-		  }
-		  d2_old = d2_new;
-		  psi_old = psi_new;
-	    }
-      }
-      *energy /= norma;
-      *accept = (double) n_accept / nmax;
+            d2_old = d2_new;
+            psi_old = psi_new;
+        }
+    }
+    *energy = *energy / norm;
+    *accep = (double) n_accep / (double) nmax;
 }
 
-int main() {
-      const double a = 1.2;
-      const double dt = 0.05;
-      const double tau = 100.0;
-      const double e_ref = -0.5;
-      const long nmax = 1e5;
-      int nruns = 30;
 
-      srand(time(NULL));
+int main(void) {
 
-      double ene[nruns], acc[nruns], obs[2];
+#define a      1.2
+#define dt     0.05
+#define e_ref  -0.5
+#define tau    100.0
+#define nmax   100000
+#define nruns  30
 
-      for (int i = 0; i < nruns; ++i) {
-	    pdmc(a, nmax, dt, &ene[i], &acc[i], tau, e_ref);
-      }
+    double X[nruns];
+    double Y[nruns];
+    double ave, err;
 
-      ave_error(ene, nruns, obs);
-      printf("E = %.5lf +/- %.5lf\n", obs[0], obs[1]);
+    srand48(time(NULL));
 
-      ave_error(acc, nruns, obs);
-      printf("A = %.5lf +/- %.5lf\n", obs[0], obs[1]);
-      
-      return 0;
+    for (size_t irun = 0; irun < nruns; irun++) {
+        pdmc(a, nmax, dt, &X[irun], &Y[irun], tau, e_ref);
+    }
+
+    ave_error(X, nruns, &ave, &err);
+    printf("E = %f +/- %f\n", ave, err);
+
+    ave_error(Y, nruns, &ave, &err);
+    printf("A = %f +/- %f\n", ave, err);
+
+    return 0;
 }
