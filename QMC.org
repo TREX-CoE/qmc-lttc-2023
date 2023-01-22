@@ -555,7 +555,7 @@ def kinetic(a,r):
     if distance > 0:
         dinv = 1./distance 
     else:
-        print *, 'Warning: kinetic energy diverges at r=0'
+        print ('Warning: kinetic energy diverges at r=0')
         dinv = float("inf") 
     return a * (dinv - 0.5 * a)
      #+END_SRC
@@ -1002,7 +1002,7 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
    If the space is discretized in small volume elements $\mathbf{r}_i$
    of size $\delta \mathbf{r}$, the expression of $\langle E_L \rangle_{\Psi^2}$
    becomes a weighted average of the local energy, where the weights
-   are the values of the wave function square at $\mathbf{r}_i$
+   are the values of the square of the wave function at $\mathbf{r}_i$
    multiplied by the volume element:
      
    $$

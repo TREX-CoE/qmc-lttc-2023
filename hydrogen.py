@@ -32,7 +32,7 @@ def kinetic(a,r):
     if distance > 0:
         dinv = 1./distance 
     else:
-        print *, 'Warning: kinetic energy diverges at r=0'
+        print ('Warning: kinetic energy diverges at r=0')
         dinv = float("inf") 
     return a * (dinv - 0.5 * a)
 
