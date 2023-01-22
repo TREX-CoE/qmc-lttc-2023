@@ -207,7 +207,7 @@ def test_potential():
           assert potential(r) == expected_output
 
     r = (0., 0., 0.)
-    assert potential(r) == inf
+    assert potential(r) == float("inf")
 
     print("potential ok")
 
@@ -246,6 +246,7 @@ subroutine test_potential
     r(:) = 0.d0
     expected_output = huge(1.d0)
     if (potential(r) /= expected_output) stop 'Failed r=0'
+    print *, 'potential ok'
     
 end subroutine test_potential
 
@@ -284,6 +285,8 @@ static void test_potential() {
     expected_output = HUGE_VAL;
     r[0] = 0.;   r[1] = 0.;   r[2] = 0.;
     assert (potential(r) == expected_output);
+
+    printf("potential ok\n");
 }
 
 #ifdef TEST_H
@@ -364,7 +367,7 @@ def potential(r):
     distance = np.sqrt(np.dot(r,r))
     if distance == 0:
         print("potential at r=0 diverges")
-        return inf
+        return float("inf")
     return -1. / distance
 
 

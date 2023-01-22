@@ -5,7 +5,7 @@ def potential(r):
     distance = np.sqrt(np.dot(r,r))
     if distance == 0:
         print("potential at r=0 diverges")
-        return inf
+        return float("inf")
     return -1. / distance
 
 
@@ -17,7 +17,7 @@ def test_potential():
           assert potential(r) == expected_output
 
     r = (0., 0., 0.)
-    assert potential(r) == inf
+    assert potential(r) == float("inf")
 
     print("potential ok")
 

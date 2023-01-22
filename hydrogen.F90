@@ -44,6 +44,7 @@ subroutine test_potential
     r(:) = 0.d0
     expected_output = huge(1.d0)
     if (potential(r) /= expected_output) stop 'Failed r=0'
+    print *, 'potential ok'
     
 end subroutine test_potential
 
