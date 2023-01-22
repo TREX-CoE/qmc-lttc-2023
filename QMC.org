@@ -90,10 +90,9 @@
   arbitrary function $f(x)$ with respect to a probability density
   function $P(x)$ is given by
 
-# $$ \langle f \rangle_P = \int_{-\infty}^\infty \frac{f(x)}{P(x)}\, P(x)\, dx = \int_{-\infty}^\infty \frac{f(x)}{P(x)}\, dP(x), $$
-  $$ \langle f \rangle_P = \int_{-\infty}^\infty f(x)\, dx $$
+  $$ \langle f \rangle_P = \int_{-\infty}^\infty f(x)\, P(x) dx $$
 
-  where a probability density function $P(x)$ is non-negative
+  where the probability density function $P(x)$ is non-negative
   and integrates to one:
 
   $$ \int_{-\infty}^\infty P(x)\,dx = 1. $$
@@ -103,9 +102,9 @@
 # $$ dP(x) = \int_{0}^x P(y)\,dy . $$
 
   Similarly, we can view the energy of a system, $E$, as the expected value of the local energy with respect to
-  a probability density $P(\mathbf{r})$ defined in 3$N$ dimensions:
+  a probability density $P(\mathbf{r})$ defined in $3N$ dimensions:
   
-  $$ E =  \int E_L(\mathbf{r}) P(\mathbf{r})\,d\mathbf{r} \equiv  \langle E_L \rangle_{P}\,, $$
+  $$ E =  \int E_L(\mathbf{r})\, P(\mathbf{r})\,d\mathbf{r} \equiv  \langle E_L \rangle_{P}\,, $$
   
   where the probability density is given by the square of the wave function:
   
@@ -138,7 +137,7 @@
 ** Local energy
    :PROPERTIES:
    :header-args:python: :tangle hydrogen.py
-   :header-args:f90: :tangle hydrogen.f90
+   :header-args:f90: :tangle hydrogen.F90
    :header-args:c: :tangle hydrogen.c
    :END:
 
@@ -146,8 +145,8 @@
    energy of the Hydrogen atom for the given wave function.
    
    Write all the functions of this section in a single file :
-   ~hydrogen.py~ if you use Python, ~hydrogen.f90~ if you use
-   Fortran, or ~hydrogen.c~ if you use C.
+   ~hydrogen.py~ if you use Python, ~hydrogen.F90~ if you use
+   Fortran, or ~hydrogen.c~ and ~hydrogen.h~ if you use C.
    
    #+begin_note
    - When computing a square root in $\mathbb{R}$, *always* make sure
@@ -166,7 +165,8 @@
     calculates the distance from the origin using the Euclidean
     distance formula, and then calculates the potential using this
     distance.
-    If the distance is 0, the program stops and prints an error message.
+    If the distance is 0, the program prints a warning that the
+    potential diverges.
     If the distance is greater than 0, the potential is calculated as 
 
     \[
@@ -175,18 +175,151 @@
     \]
     #+end_exercise
 
+    *Test-driven development*
+
+    [[https://en.wikipedia.org/wiki/Test-driven_development][Test-driven development]] (TDD) is a software development process in
+    which automated tests are written before the code they are
+    testing. The tests are then run to ensure that the code is working
+    as expected, and the developer continues to write code until all
+    tests pass. The benefits of TDD include:
+
+    - Early detection of bugs: By writing tests before the code, developers
+    can identify and fix bugs early on in the development process, before
+    the code becomes too complex to easily debug.
+
+    - Improved code quality: Writing tests forces developers to think about
+    the behavior and functionality of the code they are writing, leading
+    to more robust and maintainable code.
+
+    - Better documentation: Tests act as a form of documentation for the
+    code, making it clear what the code is supposed to do and how it
+    should behave.
+
+    Here's how you can test the ~potential~ function in Python:
+
+    #+NAME: test_p
+     #+BEGIN_SRC python :exports none :tangle none
+def test_potential():
+    expected_output = -1./15.
+    for r in [( 2., 5., 14.), (5., 14., 2.), 
+              (-2., 5.,-14.), (5.,-14.,-2.), 
+              ( 0., 9.,-12.), (9.,-12., 0.)]:
+        assert potential(r) == expected_output
+
+    r = (0., 0., 0.)
+    assert potential(r) == inf
+
+    print("potential ok")
+
+if __name__ == "__main__":
+    test_potential()
+     #+END_SRC
+
+    #+NAME: test_f
+     #+BEGIN_SRC f90 :tangle none :exports none
+subroutine test_potential
+    implicit none
+    double precision :: r(3)
+    double precision :: expected_output
+    double precision, external :: potential
+
+    expected_output = -1.d0/15.d0
+
+    r(:) = (/ 2.d0, 5.d0, 14.d0 /)
+    if (potential(r) /= expected_output) stop 'Failed'
+
+    r(:) = (/ 5.d0, 14.d0, 2.d0 /)
+    if (potential(r) /= expected_output) stop 'Failed'
+
+    r(:) = (/ -2.d0, 5.d0, -14.d0 /)
+    if (potential(r) /= expected_output) stop 'Failed'
+
+    r(:) = (/ 5.d0, -14.d0, -2.d0 /)
+    if (potential(r) /= expected_output) stop 'Failed'
+
+    r(:) = (/ 0.d0, 9.d0, 12.d0 /)
+    if (potential(r) /= expected_output) stop 'Failed'
+
+    r(:) = (/ 9.d0, -12.d0, 0.d0 /)
+    if (potential(r) /= expected_output) stop 'Failed'
+
+    r(:) = 0.d0
+    expected_output = huge(1.d0)
+    if (potential(r) /= expected_output) stop 'Failed r=0'
+    
+end subroutine test_potential
+
+#ifdef TEST_H
+program test_h
+  call test_potential
+end program test_h
+#endif
+#+END_SRC
+
+    #+NAME: test_c
+    #+begin_src c :exports none :tangle none
+static void test_potential() {
+    double r[3];
+    double expected_output;
+
+    expected_output = -1./15.;
+    r[0] = 2.;   r[1] =  5.;   r[2] = 14.;
+    assert (potential(r) == expected_output);
+
+    r[0] = 5.;   r[1] = 14.;   r[2] = 2.;
+    assert (potential(r) == expected_output);
+
+    r[0] = -2.;   r[1] = 5.;   r[2] = -14.;
+    assert (potential(r) == expected_output);
+
+    r[0] = 5.;   r[1] = -14.;   r[2] = -2.;
+    assert (potential(r) == expected_output);
+
+    r[0] = 0.;   r[1] = 9.;   r[2] = 12.;
+    assert (potential(r) == expected_output);
+
+    r[0] = 9.;   r[1] = -12.;   r[2] = 0.;
+    assert (potential(r) == expected_output);
+
+    expected_output = HUGE_VAL;
+    r[0] = 0.;   r[1] = 0.;   r[2] = 0.;
+    assert (potential(r) == expected_output);
+}
+
+#ifdef TEST_H
+int main() {
+    test_potential();
+    return 0;
+}
+#endif
+    #+end_src
 
     *Python*
-     #+BEGIN_SRC python :results none :tangle none
+
+     #+BEGIN_SRC python :noweb yes :results none :tangle test_hydrogen.py
 #!/usr/bin/env python3
 import numpy as np
 
+
 def potential(r):
     # TODO
+
+<<test_p>>
      #+END_SRC
 
     *Fortran*
-     #+BEGIN_SRC f90 :tangle none
+
+    If the extension of your file is =.F90= and not =.f90=, the C
+    preprocessor will be called before compiling. This enables the
+    possibility to have conditional compilation with ~#ifdef~
+    statements, activated with the ~-D~ compiler option.
+
+    To compile your code and activate the test, use:
+    #+begin_src bash
+gfortran -DTEST_H hydrogen.F90 -o test_hydrogen
+    #+end_src
+
+     #+BEGIN_SRC f90 :tangle none :noweb yes
 double precision function potential(r)
   implicit none
   double precision, intent(in) :: r(3)
@@ -194,34 +327,53 @@ double precision function potential(r)
   ! TODO
 
 end function potential
+
+<<test_f>>
      #+END_SRC
 
      *C*
-     #+begin_src c :tangle none
+
+     Compile your code with the ~-DTEST_H~ option. It will activate
+     the creation of the main function that will test your functions.
+     Don't forget to use ~-lm~ to link with the math library.
+
+    #+begin_src bash
+gcc -DTEST_H hydrogen.c -lm -o test_hydrogen
+    #+end_src
+
+     #+begin_src c :tangle none :noweb yes
 #include <stdio.h>   // printf
 #include <math.h>    // sqrt
 #include <stdlib.h>  // exit
+#include <assert.h>  // assert
 
 double potential(double r[3]) {
   // TODO
 }
 
-     #+end_src
+<<test_c>>
+     #+END_SRC
 
+    
 **** Solution                                                      :solution:
     *Python*
-     #+BEGIN_SRC python :results none
+     #+BEGIN_SRC python :results none :noweb yes
 #!/usr/bin/env python3
 import numpy as np
 
 def potential(r):
     distance = np.sqrt(np.dot(r,r))
-    assert (distance > 0)
+    if distance == 0:
+        print("potential at r=0 diverges")
+        return inf
     return -1. / distance
+
+
+<<test_p>>
      #+END_SRC
 
     *Fortran*
-     #+BEGIN_SRC f90 
+     #+BEGIN_SRC f90  :noweb yes
 double precision function potential(r)
   implicit none
   double precision, intent(in) :: r(3)
@@ -233,17 +385,21 @@ double precision function potential(r)
   if (distance > 0.d0) then
      potential = -1.d0 / distance
   else
-     stop 'potential at r=0.d0 diverges'
+     print *, 'Warning: potential at r=0.d0 diverges'
+     potential = huge(1.d0)
   end if
 
 end function potential
+
+<<test_f>>
      #+END_SRC
 
      *C*
-     #+begin_src c
+     #+begin_src c :noweb yes
 #include <stdio.h>   // printf
 #include <math.h>    // sqrt
 #include <stdlib.h>  // exit
+#include <assert.h>  // assert
 
 double potential(double r[3]) {
   double distance;
@@ -253,11 +409,12 @@ double potential(double r[3]) {
   if (distance > 0) {
     return -1.0 / distance;
   } else {
-    printf("Error: potential at r=0 diverges\n");
-    exit(1);
+    printf("Warning: potential at r=0 diverges\n");
+    return HUGE_VAL;
   }
 }
 
+<<test_c>>
      #+end_src
 
 *** Exercise 2
@@ -429,7 +586,7 @@ double kinetic(double a, double r[3]) {
   if (distance > 0) {
     return a * (1.0 / distance - 0.5 * a);
   } else {
-    printf("Error: kinetic energy diverges at r=0\n");
+    printf("Warning: kinetic energy diverges at r=0\n");
     exit(1);
   }
 }
@@ -540,12 +697,12 @@ double e_loc(double a, double r[3]) {
 ** Plot of the local energy along the $x$ axis
    :PROPERTIES:
    :header-args:python: :tangle plot_hydrogen.py
-   :header-args:f90: :tangle plot_hydrogen.f90
+   :header-args:f90: :tangle plot_hydrogen.F90
    :header-args:c: :tangle plot_hydrogen.c
    :END:
    
    The program you will write in this section will be written in
-   another file (~plot_hydrogen.py~,  ~plot_hydrogen.f90~ or ~plot_hydrogen.c~ for
+   another file (~plot_hydrogen.py~,  ~plot_hydrogen.F90~ or ~plot_hydrogen.c~ for
    example).
    It will use the functions previously defined.
    If you use C, don't forget to write the header file corresponding
@@ -572,7 +729,7 @@ from hydrogen import e_loc
    
    In Fortran, you will need to compile all the source files together:
    #+begin_src sh :exports both
-gfortran hydrogen.f90 plot_hydrogen.f90 -o plot_hydrogen
+gfortran hydrogen.F90 plot_hydrogen.F90 -o plot_hydrogen
    #+end_src
 
    Similarly, in C
@@ -648,7 +805,7 @@ end program plot
      To compile and run:
 
      #+begin_src bash :exports both
-gfortran hydrogen.f90 plot_hydrogen.f90 -o plot_hydrogen
+gfortran hydrogen.F90 plot_hydrogen.F90 -o plot_hydrogen
 ./plot_hydrogen > data
      #+end_src
 
@@ -760,7 +917,7 @@ end program plot
      #+end_src
 
      #+begin_src sh :exports none
-gfortran hydrogen.f90 plot_hydrogen.f90 -o plot_hydrogen
+gfortran hydrogen.F90 plot_hydrogen.F90 -o plot_hydrogen
 ./plot_hydrogen > data
      #+end_src
 
@@ -834,7 +991,7 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
 ** Numerical estimation of the energy
    :PROPERTIES:
    :header-args:python: :tangle energy_hydrogen.py
-   :header-args:f90: :tangle energy_hydrogen.f90
+   :header-args:f90: :tangle energy_hydrogen.F90
    :header-args:c: :tangle energy_hydrogen.c
    :END:
 
@@ -909,7 +1066,7 @@ end program energy_hydrogen
      To compile the Fortran code and run it:
 
      #+begin_src sh :results output :exports code
-gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
+gfortran hydrogen.F90 energy_hydrogen.F90 -o energy_hydrogen
 ./energy_hydrogen 
      #+end_src
 
@@ -1065,7 +1222,7 @@ end program energy_hydrogen
      #+end_src
 
      #+begin_src sh :results output :exports results
-gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
+gfortran hydrogen.F90 energy_hydrogen.F90 -o energy_hydrogen
 ./energy_hydrogen 
      #+end_src
 
@@ -1144,7 +1301,7 @@ gcc hydrogen.c energy_hydrogen.c -lm -o energy_hydrogen
 ** Variance of the local energy
    :PROPERTIES:
    :header-args:python: :tangle variance_hydrogen.py
-   :header-args:f90: :tangle variance_hydrogen.f90
+   :header-args:f90: :tangle variance_hydrogen.F90
    :header-args:c: :tangle variance_hydrogen.c
    :END:
 
@@ -1238,7 +1395,7 @@ end program variance_hydrogen
      To compile and run:
 
      #+begin_src sh :results output :exports both
-gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
+gfortran hydrogen.F90 variance_hydrogen.F90 -o variance_hydrogen
 ./variance_hydrogen
      #+end_src
 
@@ -1389,7 +1546,7 @@ end program variance_hydrogen
     #+end_src
 
     #+begin_src sh :results output :exports results
-gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
+gfortran hydrogen.F90 variance_hydrogen.F90 -o variance_hydrogen
 ./variance_hydrogen
     #+end_src
 
@@ -1486,7 +1643,7 @@ gcc hydrogen.c variance_hydrogen.c -lm -o variance_hydrogen
 ** Computation of the statistical error
    :PROPERTIES:
    :header-args:python: :tangle qmc_stats.py
-   :header-args:f90: :tangle qmc_stats.f90
+   :header-args:f90: :tangle qmc_stats.F90
    :header-args:c: :tangle qmc_stats.c
    :END:
 
@@ -1665,7 +1822,7 @@ void ave_error(double* x, size_t n, double *ave, double *err) {
 ** Uniform sampling in the box
    :PROPERTIES:
    :header-args:python: :tangle qmc_uniform.py
-   :header-args:f90: :tangle qmc_uniform.f90
+   :header-args:f90: :tangle qmc_uniform.F90
    :header-args:c: :tangle qmc_uniform.c
    :END:
 
@@ -1786,7 +1943,7 @@ end program qmc
      #+END_SRC
 
      #+begin_src sh :results output :exports code
-gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
+gfortran hydrogen.F90 qmc_stats.F90 qmc_uniform.F90 -o qmc_uniform
 ./qmc_uniform
      #+end_src
 
@@ -1969,7 +2126,7 @@ end program qmc
      #+END_SRC
 
      #+begin_src sh :results output :exports results
-gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
+gfortran hydrogen.F90 qmc_stats.F90 qmc_uniform.F90 -o qmc_uniform
 ./qmc_uniform
      #+end_src
 
@@ -2041,7 +2198,7 @@ gcc hydrogen.c qmc_stats.c qmc_uniform.c -lm -o qmc_uniform
 ** Metropolis sampling with $\Psi^2$
    :PROPERTIES:
    :header-args:python: :tangle qmc_metropolis.py
-   :header-args:f90: :tangle qmc_metropolis.f90
+   :header-args:f90: :tangle qmc_metropolis.F90
    :header-args:c: :tangle qmc_metropolis.c
    :END:
 
@@ -2402,7 +2559,7 @@ end program qmc
      #+END_SRC
 
      #+begin_src sh :results output :exports results
-gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
+gfortran hydrogen.F90 qmc_stats.F90 qmc_metropolis.F90 -o qmc_metropolis
 ./qmc_metropolis
      #+end_src
      #+RESULTS:
@@ -2496,7 +2653,7 @@ gcc hydrogen.c qmc_stats.c qmc_metropolis.c -lm -o qmc_metropolis
 ** Generalized Metropolis algorithm
    :PROPERTIES:
    :header-args:python: :tangle vmc_metropolis.py
-   :header-args:f90: :tangle vmc_metropolis.f90
+   :header-args:f90: :tangle vmc_metropolis.F90
    :header-args:c: :tangle vmc_metropolis.c
    :END:
 
@@ -2575,6 +2732,9 @@ gcc hydrogen.c qmc_stats.c qmc_metropolis.c -lm -o qmc_metropolis
    
 
    
+   # TODO
+   #    prod    = np.dot((d_new + d_old), (r_new - r_old))
+   #    argexpo = 0.5 * (d2_new - d2_old)*dt + prod
    The algorithm of the previous exercise is only slightly modified as:
    
    1) Evaluate the local energy at $\mathbf{r}_{n}$ and accumulate it
@@ -2602,7 +2762,7 @@ gcc hydrogen.c qmc_stats.c qmc_metropolis.c -lm -o qmc_metropolis
     In Python, you can use the [[https://numpy.org/doc/stable/reference/random/generated/numpy.random.normal.html][~random.normal~]] function of Numpy.
 
     *Fortran*
-    #+BEGIN_SRC f90 :tangle qmc_stats.f90
+    #+BEGIN_SRC f90 :tangle qmc_stats.F90
 subroutine random_gauss(z,n)
   implicit none
   integer, intent(in) :: n
@@ -2679,7 +2839,7 @@ void random_gauss(double* z, size_t n) {
     
      #+begin_exercise
      If you use Fortran of C, copy/paste the ~random_gauss~ function in
-     the ~qmc_stats.f90~ or ~qmc_stats.c~ file.
+     the ~qmc_stats.F90~ or ~qmc_stats.c~ file.
      #+end_exercise
      
      #+begin_exercise
@@ -2720,7 +2880,7 @@ def drift(a,r):
      #+END_SRC
 
     *Fortran*
-     #+BEGIN_SRC f90 :tangle hydrogen.f90
+     #+BEGIN_SRC f90 :tangle hydrogen.F90
 subroutine drift(a,r,b)
   implicit none
   double precision, intent(in)  :: a, r(3)
@@ -2829,7 +2989,7 @@ end program qmc
      #+END_SRC
 
      #+begin_src sh :results output :exports code
-gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
+gfortran hydrogen.F90 qmc_stats.F90 vmc_metropolis.F90 -o vmc_metropolis
 ./vmc_metropolis
      #+end_src
 
@@ -3051,7 +3211,7 @@ end program qmc
      #+END_SRC
 
      #+begin_src sh :results output :exports results
-gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
+gfortran hydrogen.F90 qmc_stats.F90 vmc_metropolis.F90 -o vmc_metropolis
 ./vmc_metropolis
      #+end_src
 
@@ -3460,7 +3620,7 @@ gcc hydrogen.c qmc_stats.c vmc_metropolis.c -lm -o vmc_metropolis
 ** Hydrogen atom
   :PROPERTIES:
   :header-args:python: :tangle pdmc.py
-  :header-args:f90: :tangle pdmc.f90
+  :header-args:f90: :tangle pdmc.F90
   :header-args:c: :tangle pdmc.c
   :END:
    
@@ -3553,7 +3713,7 @@ end program qmc
      #+END_SRC
 
      #+begin_src sh 
-gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
+gfortran hydrogen.F90 qmc_stats.F90 pdmc.F90 -o pdmc
 ./pdmc
      #+end_src
 
@@ -3814,7 +3974,7 @@ end program qmc
      #+END_SRC
    
      #+begin_src sh :results output
-gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
+gfortran hydrogen.F90 qmc_stats.F90 pdmc.F90 -o pdmc
 ./pdmc
      #+end_src
 

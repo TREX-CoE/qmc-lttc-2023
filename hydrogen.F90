@@ -9,10 +9,49 @@ double precision function potential(r)
   if (distance > 0.d0) then
      potential = -1.d0 / distance
   else
-     stop 'potential at r=0.d0 diverges'
+     print *, 'Warning: potential at r=0.d0 diverges'
+     potential = huge(1.d0)
   end if
 
 end function potential
+
+subroutine test_potential
+    implicit none
+    double precision :: r(3)
+    double precision :: expected_output
+    double precision, external :: potential
+
+    expected_output = -1.d0/15.d0
+
+    r(:) = (/ 2.d0, 5.d0, 14.d0 /)
+    if (potential(r) /= expected_output) stop 'Failed'
+
+    r(:) = (/ 5.d0, 14.d0, 2.d0 /)
+    if (potential(r) /= expected_output) stop 'Failed'
+
+    r(:) = (/ -2.d0, 5.d0, -14.d0 /)
+    if (potential(r) /= expected_output) stop 'Failed'
+
+    r(:) = (/ 5.d0, -14.d0, -2.d0 /)
+    if (potential(r) /= expected_output) stop 'Failed'
+
+    r(:) = (/ 0.d0, 9.d0, 12.d0 /)
+    if (potential(r) /= expected_output) stop 'Failed'
+
+    r(:) = (/ 9.d0, -12.d0, 0.d0 /)
+    if (potential(r) /= expected_output) stop 'Failed'
+
+    r(:) = 0.d0
+    expected_output = huge(1.d0)
+    if (potential(r) /= expected_output) stop 'Failed r=0'
+    
+end subroutine test_potential
+
+#ifdef TEST_H
+program test_h
+  call test_potential
+end program test_h
+#endif
 
 double precision function psi(a, r)
   implicit none
