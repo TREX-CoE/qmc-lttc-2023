@@ -8,10 +8,10 @@
 
 void uniform_montecarlo(double a, size_t nmax, double *energy) {
     size_t istep;
-    double norm, r[3], w;
+    double normalization, r[3], w;
 
     *energy = 0.0;
-    norm = 0.0;
+    normalization = 0.0;
 
     for (istep = 0; istep < nmax; istep++) {
         for (int i = 0; i < 3; i++) {
@@ -24,9 +24,9 @@ void uniform_montecarlo(double a, size_t nmax, double *energy) {
         w = psi(a, r);
         w = w*w;
         *energy += w * e_loc(a, r);
-        norm += w;
+        normalization += w;
     }
-    *energy = *energy / norm;
+    *energy = *energy / normalization;
 }
 
 int main(void) {

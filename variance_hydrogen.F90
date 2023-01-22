@@ -2,7 +2,7 @@ program variance_hydrogen
   implicit none
 
   double precision :: x(50), w, delta, energy, energy2
-  double precision :: dx, r(3), a(6), norm, e_tmp, s2
+  double precision :: dx, r(3), a(6), normalization, e_tmp, s2
   integer          :: i, k, l, j
 
   double precision, external :: e_loc, psi
@@ -21,7 +21,7 @@ program variance_hydrogen
   do j=1,size(a)
      energy  = 0.d0
      energy2 = 0.d0
-     norm    = 0.d0
+     normalization = 0.d0
 
      do i=1,size(x)
         r(1) = x(i)
@@ -39,15 +39,15 @@ program variance_hydrogen
 
               energy  = energy  + w * e_tmp
               energy2 = energy2 + w * e_tmp * e_tmp
-              norm   = norm     + w 
+              normalization = normalization + w 
            end do
 
         end do
 
      end do
 
-     energy  = energy  / norm
-     energy2 = energy2 / norm
+     energy  = energy  / normalization
+     energy2 = energy2 / normalization
 
      s2 = energy2 - energy*energy
 

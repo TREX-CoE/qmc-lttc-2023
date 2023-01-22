@@ -7,7 +7,7 @@
 
 int main() {
 
-    double x[NPOINTS], energy, dx, r[3], delta, norm, w;
+    double x[NPOINTS], energy, dx, r[3], delta, normalization, w;
     double a[NEXPO] = { 0.1, 0.2, 0.5, 1.0, 1.5, 2.0 };
     double energy2, e_tmp, s2;
 
@@ -24,7 +24,7 @@ int main() {
     for (int j = 0; j < NEXPO; j++) {
         energy  = 0.0;
         energy2 = 0.0;
-        norm    = 0.0;
+        normalization = 0.0;
 
         for (int i = 0; i < NPOINTS; i++) {
             r[0] = x[i];
@@ -42,12 +42,12 @@ int main() {
 
                     energy  += w * e_tmp;
                     energy2 += w * e_tmp * e_tmp;
-                    norm    += w;
+                    normalization += w;
                 }
             }
         }
-        energy  = energy/norm;
-        energy2 = energy2/norm;
+        energy  = energy/normalization;
+        energy2 = energy2/normalization;
         s2 = energy2 - energy*energy;
         printf("a = %f    E = %f    s2 = %f\n", a[j], energy, s2);
     }

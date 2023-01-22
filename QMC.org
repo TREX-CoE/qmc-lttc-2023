@@ -1047,7 +1047,7 @@ for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
 program energy_hydrogen
   implicit none
   double precision, external :: e_loc, psi
-  double precision :: x(50), w, delta, energy, dx, r(3), a(6), norm
+  double precision :: x(50), w, delta, energy, dx, r(3), a(6), normalization
   integer :: i, k, l, j
 
   a = (/ 0.1d0, 0.2d0, 0.5d0, 1.d0, 1.5d0, 2.d0 /)
@@ -1086,7 +1086,7 @@ gfortran hydrogen.F90 energy_hydrogen.F90 -o energy_hydrogen
 
 int main() {
 
-    double x[NPOINTS], energy, dx, r[3], delta, norm, w;
+    double x[NPOINTS], energy, dx, r[3], delta, normalization, w;
     double a[NEXPO] = { 0.1, 0.2, 0.5, 1.0, 1.5, 2.0 };
 
     dx = 10.0/(NPOINTS-1);
@@ -1146,7 +1146,7 @@ r = np.array([0.,0.,0.])
 
 for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
     E    = 0.
-    norm = 0.
+    normalization = 0.
 
     for x in interval:
         r[0] = x
@@ -1159,9 +1159,9 @@ for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
                 w = w * w * delta
 
                 E    += w * e_loc(a,r)
-                norm += w 
+                normalization += w 
 
-    E = E / norm
+    E = E / normalization
     print(f"a = {a} \t E = {E}")                
 
      #+end_src
@@ -1180,7 +1180,7 @@ for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
 program energy_hydrogen
   implicit none
   double precision, external :: e_loc, psi
-  double precision :: x(50), w, delta, energy, dx, r(3), a(6), norm
+  double precision :: x(50), w, delta, energy, dx, r(3), a(6), normalization
   integer          :: i, k, l, j
 
   a = (/ 0.1d0, 0.2d0, 0.5d0, 1.d0, 1.5d0, 2.d0 /)
@@ -1196,7 +1196,7 @@ program energy_hydrogen
 
   do j=1,size(a)
      energy = 0.d0
-     norm   = 0.d0
+     normalization = 0.d0
      
      do i=1,size(x)
         r(1) = x(i)
@@ -1211,14 +1211,14 @@ program energy_hydrogen
               w = w * w * delta
 
               energy = energy + w * e_loc(a(j), r)
-              norm   = norm   + w 
+              normalization = normalization + w 
            end do
 
         end do
 
      end do
 
-     energy = energy / norm
+     energy = energy / normalization
      print *, 'a = ', a(j), '    E = ', energy
   end do
 
@@ -1249,7 +1249,7 @@ gfortran hydrogen.F90 energy_hydrogen.F90 -o energy_hydrogen
 
 int main() {
 
-    double x[NPOINTS], energy, dx, r[3], delta, norm, w;
+    double x[NPOINTS], energy, dx, r[3], delta, normalization, w;
     double a[NEXPO] = { 0.1, 0.2, 0.5, 1.0, 1.5, 2.0 };
 
     dx = 10.0/(NPOINTS-1);
@@ -1264,7 +1264,7 @@ int main() {
 
     for (int j = 0; j < NEXPO; j++) {
         energy = 0.0;
-        norm = 0.0;
+        normalization = 0.0;
 
         for (int i = 0; i < NPOINTS; i++) {
             r[0] = x[i];
@@ -1279,11 +1279,11 @@ int main() {
                     w = w*w*delta;
 
                     energy += w*e_loc(a[j], r);
-                    norm += w;
+                    normalization += w;
                 }
             }
         }
-        energy = energy/norm;
+        energy = energy/normalization;
         printf("a = %f    E = %f\n", a[j], energy);
     }
 }
@@ -1374,7 +1374,7 @@ program variance_hydrogen
   implicit none
 
   double precision :: x(50), w, delta, energy, energy2
-  double precision :: dx, r(3), a(6), norm, e_tmp, s2
+  double precision :: dx, r(3), a(6), normalization, e_tmp, s2
   integer          :: i, k, l, j
 
   double precision, external :: e_loc, psi
@@ -1414,7 +1414,7 @@ gfortran hydrogen.F90 variance_hydrogen.F90 -o variance_hydrogen
 
 int main() {
 
-    double x[NPOINTS], energy, dx, r[3], delta, norm, w;
+    double x[NPOINTS], energy, dx, r[3], delta, normalization, w;
     double a[NEXPO] = { 0.1, 0.2, 0.5, 1.0, 1.5, 2.0 };
     double energy2, e_tmp, s2;
 
@@ -1452,7 +1452,7 @@ r = np.array([0.,0.,0.])
 for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
     E    = 0.
     E2   = 0.
-    norm = 0.
+    normalization = 0.
 
     for x in interval:
         r[0] = x
@@ -1469,10 +1469,10 @@ for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
                 e_tmp = e_loc(a,r)
                 E    += w * e_tmp
                 E2   += w * e_tmp * e_tmp
-                norm += w 
+                normalization += w 
 
-    E  = E  / norm
-    E2 = E2 / norm
+    E  = E  / normalization
+    E2 = E2 / normalization
 
     s2 = E2 - E**2
     print(f"a = {a} \t E = {E:10.8f} \t \sigma^2 = {s2:10.8f}")
@@ -1494,7 +1494,7 @@ program variance_hydrogen
   implicit none
 
   double precision :: x(50), w, delta, energy, energy2
-  double precision :: dx, r(3), a(6), norm, e_tmp, s2
+  double precision :: dx, r(3), a(6), normalization, e_tmp, s2
   integer          :: i, k, l, j
 
   double precision, external :: e_loc, psi
@@ -1513,7 +1513,7 @@ program variance_hydrogen
   do j=1,size(a)
      energy  = 0.d0
      energy2 = 0.d0
-     norm    = 0.d0
+     normalization = 0.d0
 
      do i=1,size(x)
         r(1) = x(i)
@@ -1531,15 +1531,15 @@ program variance_hydrogen
 
               energy  = energy  + w * e_tmp
               energy2 = energy2 + w * e_tmp * e_tmp
-              norm   = norm     + w 
+              normalization = normalization + w 
            end do
 
         end do
 
      end do
 
-     energy  = energy  / norm
-     energy2 = energy2 / norm
+     energy  = energy  / normalization
+     energy2 = energy2 / normalization
 
      s2 = energy2 - energy*energy
 
@@ -1573,7 +1573,7 @@ gfortran hydrogen.F90 variance_hydrogen.F90 -o variance_hydrogen
 
 int main() {
 
-    double x[NPOINTS], energy, dx, r[3], delta, norm, w;
+    double x[NPOINTS], energy, dx, r[3], delta, normalization, w;
     double a[NEXPO] = { 0.1, 0.2, 0.5, 1.0, 1.5, 2.0 };
     double energy2, e_tmp, s2;
 
@@ -1590,7 +1590,7 @@ int main() {
     for (int j = 0; j < NEXPO; j++) {
         energy  = 0.0;
         energy2 = 0.0;
-        norm    = 0.0;
+        normalization = 0.0;
 
         for (int i = 0; i < NPOINTS; i++) {
             r[0] = x[i];
@@ -1608,12 +1608,12 @@ int main() {
 
                     energy  += w * e_tmp;
                     energy2 += w * e_tmp * e_tmp;
-                    norm    += w;
+                    normalization += w;
                 }
             }
         }
-        energy  = energy/norm;
-        energy2 = energy2/norm;
+        energy  = energy/normalization;
+        energy2 = energy2/normalization;
         s2 = energy2 - energy*energy;
         printf("a = %f    E = %f    s2 = %f\n", a[j], energy, s2);
     }
@@ -1922,7 +1922,7 @@ subroutine uniform_montecarlo(a,nmax,energy)
   double precision, intent(out) :: energy
 
   integer          :: istep
-  double precision :: norm, r(3), w
+  double precision :: normalization, r(3), w
 
   double precision, external :: e_loc, psi
 
@@ -1999,7 +1999,7 @@ int main(void) {
     representing the calculated energy.
 
     The subroutine starts by initializing the energy and normalization
-    factor to 0 and defines some variables such as ~istep~, ~norm~,
+    factor to 0 and defines some variables such as ~istep~, ~normalization~,
     ~r~ and ~w~. The subroutine also makes use of two external
     functions: ~e_loc~ and ~psi~ which were defined in previous
     examples.
@@ -2085,12 +2085,12 @@ subroutine uniform_montecarlo(a,nmax,energy)
   double precision, intent(out) :: energy
 
   integer*8        :: istep
-  double precision :: norm, r(3), w
+  double precision :: normalization, r(3), w
 
   double precision, external :: e_loc, psi
 
   energy = 0.d0
-  norm   = 0.d0
+  normalization = 0.d0
 
   do istep = 1,nmax
 
@@ -2101,11 +2101,11 @@ subroutine uniform_montecarlo(a,nmax,energy)
      w = w*w
 
      energy = energy + w * e_loc(a,r)
-     norm   = norm   + w
+     normalization = normalization + w
 
   end do
 
-  energy = energy / norm
+  energy = energy / normalization
 
 end subroutine uniform_montecarlo
 
@@ -2149,10 +2149,10 @@ gfortran hydrogen.F90 qmc_stats.F90 qmc_uniform.F90 -o qmc_uniform
 
 void uniform_montecarlo(double a, size_t nmax, double *energy) {
     size_t istep;
-    double norm, r[3], w;
+    double normalization, r[3], w;
 
     ,*energy = 0.0;
-    norm = 0.0;
+    normalization = 0.0;
 
     for (istep = 0; istep < nmax; istep++) {
         for (int i = 0; i < 3; i++) {
@@ -2165,9 +2165,9 @@ void uniform_montecarlo(double a, size_t nmax, double *energy) {
         w = psi(a, r);
         w = w*w;
         ,*energy += w * e_loc(a, r);
-        norm += w;
+        normalization += w;
     }
-    ,*energy = *energy / norm;
+    ,*energy = *energy / normalization;
 }
 
 int main(void) {
@@ -3873,7 +3873,7 @@ subroutine pdmc(a, dt, nmax, energy, accep, tau, E_ref)
   double precision :: psi_old, psi_new, d2_new, argexpo, q
   double precision :: r_old(3), r_new(3)
   double precision :: d_old(3), d_new(3)
-  double precision :: e, w, norm, tau_current
+  double precision :: e, w, normalization, tau_current
 
   double precision, external :: e_loc, psi
 
@@ -3882,7 +3882,7 @@ subroutine pdmc(a, dt, nmax, energy, accep, tau, E_ref)
   ! Initialization
   energy  = 0.d0
   n_accep = 0_8
-  norm    = 0.d0
+  normalization = 0.d0
 
   w           = 1.d0
   tau_current = 0.d0
@@ -3900,7 +3900,7 @@ subroutine pdmc(a, dt, nmax, energy, accep, tau, E_ref)
      e = e_loc(a,r_old)
      w = w * dexp(-dt*(e - E_ref))
 
-     norm   = norm + w
+     normalization = normalization + w
      energy = energy + w*e
      
      tau_current = tau_current + dt
@@ -3946,7 +3946,7 @@ subroutine pdmc(a, dt, nmax, energy, accep, tau, E_ref)
 
   end do
 
-  energy = energy / norm
+  energy = energy / normalization
   accep  = dble(n_accep) / dble(nmax)
 
 end subroutine pdmc
@@ -4001,14 +4001,14 @@ void pdmc(double a, size_t nmax, double dt, double *energy, double *accep,
     double r_old[3], r_new[3];
     double d_old[3], d_new[3];
     size_t istep, n_accep;
-    double e, w, tau_current, norm;
+    double e, w, tau_current, normalization;
 
     double sq_dt = sqrt(dt);
 
     // Initialization
     ,*energy = 0.0;
     n_accep = 0;
-    norm = 0.0;
+    normalization = 0.0;
 
     w = 1.0;
     tau_current = 0.0;
@@ -4026,7 +4026,7 @@ void pdmc(double a, size_t nmax, double dt, double *energy, double *accep,
         e = e_loc(a, r_old);
         w *= exp(-dt*(e-e_ref));
 
-        norm += w;
+        normalization += w;
         ,*energy += w*e;
 
         tau_current += dt;
@@ -4071,7 +4071,7 @@ void pdmc(double a, size_t nmax, double dt, double *energy, double *accep,
             psi_old = psi_new;
         }
     }
-    ,*energy = *energy / norm;
+    ,*energy = *energy / normalization;
     ,*accep = (double) n_accep / (double) nmax;
 }
 

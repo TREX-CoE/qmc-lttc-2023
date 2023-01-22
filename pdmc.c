@@ -14,14 +14,14 @@ void pdmc(double a, size_t nmax, double dt, double *energy, double *accep,
     double r_old[3], r_new[3];
     double d_old[3], d_new[3];
     size_t istep, n_accep;
-    double e, w, tau_current, norm;
+    double e, w, tau_current, normalization;
 
     double sq_dt = sqrt(dt);
 
     // Initialization
     *energy = 0.0;
     n_accep = 0;
-    norm = 0.0;
+    normalization = 0.0;
 
     w = 1.0;
     tau_current = 0.0;
@@ -39,7 +39,7 @@ void pdmc(double a, size_t nmax, double dt, double *energy, double *accep,
         e = e_loc(a, r_old);
         w *= exp(-dt*(e-e_ref));
 
-        norm += w;
+        normalization += w;
         *energy += w*e;
 
         tau_current += dt;
@@ -84,7 +84,7 @@ void pdmc(double a, size_t nmax, double dt, double *energy, double *accep,
             psi_old = psi_new;
         }
     }
-    *energy = *energy / norm;
+    *energy = *energy / normalization;
     *accep = (double) n_accep / (double) nmax;
 }
 

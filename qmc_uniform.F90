@@ -5,12 +5,12 @@ subroutine uniform_montecarlo(a,nmax,energy)
   double precision, intent(out) :: energy
 
   integer*8        :: istep
-  double precision :: norm, r(3), w
+  double precision :: normalization, r(3), w
 
   double precision, external :: e_loc, psi
 
   energy = 0.d0
-  norm   = 0.d0
+  normalization = 0.d0
 
   do istep = 1,nmax
 
@@ -21,11 +21,11 @@ subroutine uniform_montecarlo(a,nmax,energy)
      w = w*w
 
      energy = energy + w * e_loc(a,r)
-     norm   = norm   + w
+     normalization = normalization + w
 
   end do
 
-  energy = energy / norm
+  energy = energy / normalization
 
 end subroutine uniform_montecarlo
 

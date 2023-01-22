@@ -11,7 +11,7 @@ subroutine pdmc(a, dt, nmax, energy, accep, tau, E_ref)
   double precision :: psi_old, psi_new, d2_new, argexpo, q
   double precision :: r_old(3), r_new(3)
   double precision :: d_old(3), d_new(3)
-  double precision :: e, w, norm, tau_current
+  double precision :: e, w, normalization, tau_current
 
   double precision, external :: e_loc, psi
 
@@ -20,7 +20,7 @@ subroutine pdmc(a, dt, nmax, energy, accep, tau, E_ref)
   ! Initialization
   energy  = 0.d0
   n_accep = 0_8
-  norm    = 0.d0
+  normalization = 0.d0
 
   w           = 1.d0
   tau_current = 0.d0
@@ -38,7 +38,7 @@ subroutine pdmc(a, dt, nmax, energy, accep, tau, E_ref)
      e = e_loc(a,r_old)
      w = w * dexp(-dt*(e - E_ref))
 
-     norm   = norm + w
+     normalization = normalization + w
      energy = energy + w*e
      
      tau_current = tau_current + dt
@@ -84,7 +84,7 @@ subroutine pdmc(a, dt, nmax, energy, accep, tau, E_ref)
 
   end do
 
-  energy = energy / norm
+  energy = energy / normalization
   accep  = dble(n_accep) / dble(nmax)
 
 end subroutine pdmc

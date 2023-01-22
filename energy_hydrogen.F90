@@ -1,7 +1,7 @@
 program energy_hydrogen
   implicit none
   double precision, external :: e_loc, psi
-  double precision :: x(50), w, delta, energy, dx, r(3), a(6), norm
+  double precision :: x(50), w, delta, energy, dx, r(3), a(6), normalization
   integer          :: i, k, l, j
 
   a = (/ 0.1d0, 0.2d0, 0.5d0, 1.d0, 1.5d0, 2.d0 /)
@@ -17,7 +17,7 @@ program energy_hydrogen
 
   do j=1,size(a)
      energy = 0.d0
-     norm   = 0.d0
+     normalization = 0.d0
      
      do i=1,size(x)
         r(1) = x(i)
@@ -32,14 +32,14 @@ program energy_hydrogen
               w = w * w * delta
 
               energy = energy + w * e_loc(a(j), r)
-              norm   = norm   + w 
+              normalization = normalization + w 
            end do
 
         end do
 
      end do
 
-     energy = energy / norm
+     energy = energy / normalization
      print *, 'a = ', a(j), '    E = ', energy
   end do
 
