@@ -7,7 +7,7 @@ subroutine metropolis_montecarlo(a,nmax,dt,energy,accep)
   double precision, intent(out) :: accep
 
   double precision :: r_old(3), r_new(3), psi_old, psi_new
-  double precision :: v, ratio
+  double precision :: v, ratio, u(3)
   integer*8        :: n_accep
   integer*8        :: istep
 
@@ -23,8 +23,8 @@ subroutine metropolis_montecarlo(a,nmax,dt,energy,accep)
   do istep = 1,nmax
      energy = energy + e_loc(a,r_old)
 
-     call random_number(r_new)
-     r_new(:) = r_old(:) + dt*(2.d0*r_new(:) - 1.d0)
+     call random_number(u)
+     r_new(:) = r_old(:) + dt*(2.d0*u(:) - 1.d0)
 
      psi_new = psi(a,r_new)
 

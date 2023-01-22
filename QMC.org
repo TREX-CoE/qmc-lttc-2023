@@ -157,25 +157,7 @@
    to catch the error.
    #+end_note
    
-*** Exercise 1
-
-    #+begin_exercise
-    Write a function called ~potential~ that takes a single argument
-    ~r~, which is an array of 3 double precision numbers. The function
-    calculates the distance from the origin using the Euclidean
-    distance formula, and then calculates the potential using this
-    distance.
-    If the distance is 0, the program prints a warning that the
-    potential diverges.
-    If the distance is greater than 0, the potential is calculated as 
-
-    \[
-    V(\mathbf{r}) = -\frac{1}{\sqrt{x^2 + y^2 + z^2}}, \text{ with } 
-    \mathbf{r}=\left( \begin{array}{c} x \\ y\\ z\end{array} \right),
-    \]
-    #+end_exercise
-
-    *Test-driven development*
+*** Test-driven development
 
     [[https://en.wikipedia.org/wiki/Test-driven_development][Test-driven development]] (TDD) is a software development process in
     which automated tests are written before the code they are
@@ -194,6 +176,24 @@
     - Better documentation: Tests act as a form of documentation for the
       code, making it clear what the code is supposed to do and how it
       should behave.
+
+*** Exercise 1
+
+    #+begin_exercise
+    Write a function called ~potential~ that takes a single argument
+    ~r~, which is an array of 3 double precision numbers. The function
+    calculates the distance from the origin using the Euclidean
+    distance formula, and then calculates the potential using this
+    distance.
+    If the distance is 0, the program prints a warning that the
+    potential diverges.
+    If the distance is greater than 0, the potential is calculated as 
+
+    \[
+    V(\mathbf{r}) = -\frac{1}{\sqrt{x^2 + y^2 + z^2}}, \text{ with } 
+    \mathbf{r}=\left( \begin{array}{c} x \\ y\\ z\end{array} \right),
+    \]
+    #+end_exercise
 
     Here's how you can test the ~potential~ function in Python:
 
@@ -2056,8 +2056,8 @@ def MonteCarlo(a, nmax):
      for istep in range(nmax):
           r = np.random.uniform(-5., 5., (3))
 
-          w = psi(a,r)
-          w = w*w
+          f = psi(a,r)
+          w = f*f
 
           energy        += w * e_loc(a,r)
           normalization += w
@@ -2065,7 +2065,7 @@ def MonteCarlo(a, nmax):
      return energy / normalization
 
 a    = 1.2
-nmax = 100000
+nmax = 10000
 
 X = [MonteCarlo(a,nmax) for i in range(30)]
 E, deltaE = ave_error(X)
@@ -2085,7 +2085,7 @@ subroutine uniform_montecarlo(a,nmax,energy)
   double precision, intent(out) :: energy
 
   integer*8        :: istep
-  double precision :: normalization, r(3), w
+  double precision :: normalization, r(3), w, f
 
   double precision, external :: e_loc, psi
 
@@ -2097,8 +2097,8 @@ subroutine uniform_montecarlo(a,nmax,energy)
      call random_number(r)
      r(:) = -5.d0 + 10.d0*r(:)
 
-     w = psi(a,r)
-     w = w*w
+     f = psi(a,r)
+     w = f*f
 
      energy = energy + w * e_loc(a,r)
      normalization = normalization + w
@@ -2149,7 +2149,7 @@ gfortran hydrogen.F90 qmc_stats.F90 qmc_uniform.F90 -o qmc_uniform
 
 void uniform_montecarlo(double a, size_t nmax, double *energy) {
     size_t istep;
-    double normalization, r[3], w;
+    double normalization, r[3], w, f;
 
     ,*energy = 0.0;
     normalization = 0.0;
@@ -2162,8 +2162,8 @@ void uniform_montecarlo(double a, size_t nmax, double *energy) {
         r[0] = -5.0 + 10.0 * r[0];
         r[1] = -5.0 + 10.0 * r[1];
         r[2] = -5.0 + 10.0 * r[2];
-        w = psi(a, r);
-        w = w*w;
+        f = psi(a, r);
+        w = f*f;
         ,*energy += w * e_loc(a, r);
         normalization += w;
     }
@@ -2264,7 +2264,7 @@ gcc hydrogen.c qmc_stats.c qmc_uniform.c -lm -o qmc_uniform
    
    The algorithm is summarized as follows:
    
-   1) Evaluate the local energy at $\mathbf{r}_n$ and accumulate it
+   1) Evaluate the local energy at $\mathbf{r}_n$ and add it to an accumulator
    2) Compute a new position $\mathbf{r'} = \mathbf{r}_n + \delta L\, \mathbf{u}$
    3) Evaluate $\Psi(\mathbf{r}')$ at the new position
    4) Compute the ratio $A = \frac{\left|\Psi(\mathbf{r'})\right|^2}{\left|\Psi(\mathbf{r}_{n})\right|^2}$
@@ -2498,7 +2498,7 @@ subroutine metropolis_montecarlo(a,nmax,dt,energy,accep)
   double precision, intent(out) :: accep
 
   double precision :: r_old(3), r_new(3), psi_old, psi_new
-  double precision :: v, ratio
+  double precision :: v, ratio, u(3)
   integer*8        :: n_accep
   integer*8        :: istep
 
@@ -2514,8 +2514,8 @@ subroutine metropolis_montecarlo(a,nmax,dt,energy,accep)
   do istep = 1,nmax
      energy = energy + e_loc(a,r_old)
 
-     call random_number(r_new)
-     r_new(:) = r_old(:) + dt*(2.d0*r_new(:) - 1.d0)
+     call random_number(u)
+     r_new(:) = r_old(:) + dt*(2.d0*u(:) - 1.d0)
 
      psi_new = psi(a,r_new)
 
@@ -2567,8 +2567,8 @@ gfortran hydrogen.F90 qmc_stats.F90 qmc_metropolis.F90 -o qmc_metropolis
 ./qmc_metropolis
      #+end_src
      #+RESULTS:
-     :  E =  -0.48092254316047378      +/-   4.7930979676354796E-004
-     :  A =   0.50798666666666670      +/-   3.7480365230047844E-004
+     :  E =  -0.48031509056922989      +/-   4.6803231523088529E-004
+     :  A =   0.50765333333333340      +/-   3.4368267017377720E-004
 
      *C*
      #+begin_src c
@@ -2734,8 +2734,6 @@ gcc hydrogen.c qmc_stats.c qmc_metropolis.c -lm -o qmc_metropolis
    where $\chi$ is a Gaussian random variable with zero mean and
    variance $\delta t$.
    
-
-   
    # TODO
    #    prod    = np.dot((d_new + d_old), (r_new - r_old))
    #    argexpo = 0.5 * (d2_new - d2_old)*dt + prod
@@ -2764,6 +2762,11 @@ gcc hydrogen.c qmc_stats.c qmc_metropolis.c -lm -o qmc_metropolis
     Gaussian-distributed n-dimensional vector $\mathbf{z}$. This will
     be useful for the following sections.
     In Python, you can use the [[https://numpy.org/doc/stable/reference/random/generated/numpy.random.normal.html][~random.normal~]] function of Numpy.
+
+    #+begin_exercise
+    If you use Fortran of C, copy/paste the ~random_gauss~ function in
+    the ~qmc_stats.F90~ or ~qmc_stats.c~ file.
+    #+end_exercise
 
     *Fortran*
     #+BEGIN_SRC f90 :tangle qmc_stats.F90
@@ -2841,10 +2844,6 @@ void random_gauss(double* z, size_t n) {
    
 *** Exercise 1
     
-     #+begin_exercise
-     If you use Fortran of C, copy/paste the ~random_gauss~ function in
-     the ~qmc_stats.F90~ or ~qmc_stats.c~ file.
-     #+end_exercise
      
      #+begin_exercise
      Write a function to compute the drift vector $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$.
@@ -2919,6 +2918,7 @@ void drift(double a, double r[3], double b[3]) {
     (This is a necessary step for the next section on diffusion Monte Carlo).
     #+end_exercise
    
+
     *Python*
      #+BEGIN_SRC python :results output :tangle none
 #!/usr/bin/env python3
@@ -3047,6 +3047,52 @@ gcc hydrogen.c qmc_stats.c vmc_metropolis.c -lm -o vmc_metropolis
 ./vmc_metropolis
      #+end_src
 **** Solution                                                      :solution:
+
+    #+begin_note
+    The ratio of transition probabilities can be expressed as:
+
+    \begin{eqnarray*}
+\frac{T(\mathbf{r}_{n} \rightarrow
+    \mathbf{r}_{n+1})}{T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n})} & = &
+\frac{\exp \left[ - \frac{\left(
+   \mathbf{r}_{n+1} - \mathbf{r}_{n} - \delta t\frac{\nabla
+   \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{2\,\delta t} \right]
+  }{\exp \left[ - \frac{\left(
+   \mathbf{r}_{n} - \mathbf{r}_{n+1} - \delta t\frac{\nabla
+   \Psi(\mathbf{r}_{n+1})}{\Psi(\mathbf{r}_{n+1})} \right)^2}{2\,\delta t} \right]} \\
+& = &
+\exp \left[ - \frac{\left(
+   \mathbf{r}_{n+1} - \mathbf{r}_{n} - \delta t\frac{\nabla
+   \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{2\,\delta t} 
+  + \frac{\left(
+   \mathbf{r}_{n} - \mathbf{r}_{n+1} - \delta t\frac{\nabla
+   \Psi(\mathbf{r}_{n+1})}{\Psi(\mathbf{r}_{n+1})} \right)^2}{2\,\delta t} \right] \\
+& = & 
+\exp \left[
+    - \frac{1}{2\,\delta t} |\mathbf{r}_{n+1} - \mathbf{r}_{n}|^2 +
+   (\mathbf{r}_{n+1} - \mathbf{r}_{n})\cdot \frac{\nabla
+   \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} - 
+   \frac{1}{2}\delta t \left(\frac{\nabla
+   \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)}\right)^2 \right.\\
+& & \left.
+    + \frac{1}{2\,\delta t} |\mathbf{r}_{n} - \mathbf{r}_{n+1}|^2 -
+   (\mathbf{r}_{n} - \mathbf{r}_{n+1})\cdot \frac{\nabla
+   \Psi(\mathbf{r}_{n+1})}{\Psi(\mathbf{r}_{n+1})} + 
+   \frac{1}{2}\delta t \left(\frac{\nabla
+   \Psi(\mathbf{r}_{n+1})}{\Psi(\mathbf{r}_{n+1})}\right)^2
+  \right] \\
+& = & 
+\exp \left[
+   (\mathbf{r}_{n+1} - \mathbf{r}_{n})\cdot \left( \frac{\nabla
+   \Psi(\mathbf{r}_{n+1})}{\Psi(\mathbf{r}_{n+1})} +
+    \frac{\nabla \Psi(\mathbf{r}_{n})}{\Psi(\mathbf{r}_{n})}
+   \right) 
+   + \frac{1}{2}\delta t \left(
+   \left(\frac{\nabla \Psi(\mathbf{r}_{n+1})}{\Psi(\mathbf{r}_{n+1})}\right)^2 -
+   \left(\frac{\nabla \Psi(\mathbf{r}_{n})}{\Psi(\mathbf{r}_{n})}\right)^2
+  \right) \right] 
+    \end{eqnarray*}
+    #+end_note
     *Python*
      #+BEGIN_SRC python :results output :exports both
 #!/usr/bin/env python3

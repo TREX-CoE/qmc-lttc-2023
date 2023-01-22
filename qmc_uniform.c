@@ -8,7 +8,7 @@
 
 void uniform_montecarlo(double a, size_t nmax, double *energy) {
     size_t istep;
-    double normalization, r[3], w;
+    double normalization, r[3], w, f;
 
     *energy = 0.0;
     normalization = 0.0;
@@ -21,8 +21,8 @@ void uniform_montecarlo(double a, size_t nmax, double *energy) {
         r[0] = -5.0 + 10.0 * r[0];
         r[1] = -5.0 + 10.0 * r[1];
         r[2] = -5.0 + 10.0 * r[2];
-        w = psi(a, r);
-        w = w*w;
+        f = psi(a, r);
+        w = f*f;
         *energy += w * e_loc(a, r);
         normalization += w;
     }

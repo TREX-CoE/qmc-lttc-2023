@@ -10,8 +10,8 @@ def MonteCarlo(a, nmax):
      for istep in range(nmax):
           r = np.random.uniform(-5., 5., (3))
 
-          w = psi(a,r)
-          w = w*w
+          f = psi(a,r)
+          w = f*f
 
           energy        += w * e_loc(a,r)
           normalization += w
@@ -19,7 +19,7 @@ def MonteCarlo(a, nmax):
      return energy / normalization
 
 a    = 1.2
-nmax = 100000
+nmax = 10000
 
 X = [MonteCarlo(a,nmax) for i in range(30)]
 E, deltaE = ave_error(X)

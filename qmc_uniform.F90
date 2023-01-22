@@ -5,7 +5,7 @@ subroutine uniform_montecarlo(a,nmax,energy)
   double precision, intent(out) :: energy
 
   integer*8        :: istep
-  double precision :: normalization, r(3), w
+  double precision :: normalization, r(3), w, f
 
   double precision, external :: e_loc, psi
 
@@ -17,8 +17,8 @@ subroutine uniform_montecarlo(a,nmax,energy)
      call random_number(r)
      r(:) = -5.d0 + 10.d0*r(:)
 
-     w = psi(a,r)
-     w = w*w
+     f = psi(a,r)
+     w = f*f
 
      energy = energy + w * e_loc(a,r)
      normalization = normalization + w
