@@ -5,7 +5,7 @@ def potential(r):
     distance = np.sqrt(np.dot(r,r))
     if distance == 0:
         print("potential at r=0 diverges")
-        return float("inf")
+        return -float("inf")
     return -1. / distance
 
 
@@ -17,7 +17,7 @@ def test_potential():
           assert potential(r) == expected_output
 
     r = (0., 0., 0.)
-    assert potential(r) == float("inf")
+    assert potential(r) == -float("inf")
 
     print("potential ok")
 
@@ -29,9 +29,12 @@ def psi(a, r):
 
 def kinetic(a,r):
     distance = np.sqrt(np.dot(r,r))
-    assert (distance > 0.)
-
-    return a * (1./distance - 0.5 * a)
+    if distance > 0:
+        dinv = 1./distance 
+    else:
+        print *, 'Warning: kinetic energy diverges at r=0'
+        dinv = float("inf") 
+    return a * (dinv - 0.5 * a)
 
 def e_loc(a,r):
     return kinetic(a,r) + potential(r)

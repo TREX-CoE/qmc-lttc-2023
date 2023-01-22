@@ -10,7 +10,7 @@ double precision function potential(r)
      potential = -1.d0 / distance
   else
      print *, 'Warning: potential at r=0.d0 diverges'
-     potential = huge(1.d0)
+     potential = -huge(1.d0)
   end if
 
 end function potential
@@ -42,7 +42,7 @@ subroutine test_potential
     if (potential(r) /= expected_output) stop 'Failed'
 
     r(:) = 0.d0
-    expected_output = huge(1.d0)
+    expected_output = -huge(1.d0)
     if (potential(r) /= expected_output) stop 'Failed r=0'
     print *, 'potential ok'
     
@@ -70,11 +70,10 @@ double precision function kinetic(a,r)
   distance = dsqrt( r(1)*r(1) + r(2)*r(2) + r(3)*r(3) ) 
 
   if (distance > 0.d0) then
-
      kinetic =  a * (1.d0 / distance - 0.5d0 * a)
-
   else
-     stop 'kinetic energy diverges at r=0'
+     print *, 'Warning: kinetic energy diverges at r=0'
+     kinetic =  a * (huge(1.d0) - 0.5d0 * a)
   end if
 
 end function kinetic
