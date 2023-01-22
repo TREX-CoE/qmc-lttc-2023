@@ -184,16 +184,16 @@
     tests pass. The benefits of TDD include:
 
     - Early detection of bugs: By writing tests before the code, developers
-    can identify and fix bugs early on in the development process, before
-    the code becomes too complex to easily debug.
+      can identify and fix bugs early on in the development process, before
+      the code becomes too complex to easily debug.
 
     - Improved code quality: Writing tests forces developers to think about
-    the behavior and functionality of the code they are writing, leading
-    to more robust and maintainable code.
+      the behavior and functionality of the code they are writing, leading
+      to more robust and maintainable code.
 
     - Better documentation: Tests act as a form of documentation for the
-    code, making it clear what the code is supposed to do and how it
-    should behave.
+      code, making it clear what the code is supposed to do and how it
+      should behave.
 
     Here's how you can test the ~potential~ function in Python:
 
@@ -204,7 +204,7 @@ def test_potential():
     for r in [( 2., 5., 14.), (5., 14., 2.), 
               (-2., 5.,-14.), (5.,-14.,-2.), 
               ( 0., 9.,-12.), (9.,-12., 0.)]:
-        assert potential(r) == expected_output
+          assert potential(r) == expected_output
 
     r = (0., 0., 0.)
     assert potential(r) == inf
@@ -299,7 +299,6 @@ int main() {
      #+BEGIN_SRC python :noweb yes :results none :tangle test_hydrogen.py
 #!/usr/bin/env python3
 import numpy as np
-
 
 def potential(r):
     # TODO
@@ -487,7 +486,7 @@ double psi(double a, double r[3]) {
     It first calculates the distance from the origin using the Euclidean
     distance formula. If the distance is greater than 0, the kinetic
     energy is calculated using the formula given below. If the distance is 0,
-    the program stops and prints an error message.
+    the program prints a warning.
     #+end_exercise
 
     The local kinetic energy is defined as
