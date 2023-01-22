@@ -2135,7 +2135,7 @@ gfortran hydrogen.F90 qmc_stats.F90 qmc_uniform.F90 -o qmc_uniform
      #+end_src
 
      #+RESULTS:
-     :  E =  -0.47918925027812115      +/-   2.8073517099101216E-003
+     :  E =  -0.47958062416368030      +/-   3.1460315707685389E-003
 
      *C*
      #+begin_src c :exports code
@@ -2197,7 +2197,7 @@ gcc hydrogen.c qmc_stats.c qmc_uniform.c -lm -o qmc_uniform
 ./qmc_uniform
      #+end_src
      #+RESULTS:
-     : E = -0.479050 +/- 0.002540
+     : E = -0.479507 +/- 0.001972
 
 ** Metropolis sampling with $\Psi^2$
    :PROPERTIES:
