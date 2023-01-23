@@ -7,7 +7,7 @@
 #+LATEX_HEADER_EXTRA: \usepackage{minted}
 #+HTML_HEAD: <link rel="stylesheet" title="Standard" href="worg.css" type="text/css" />
 
-#+OPTIONS: H:4 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS: H:2 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
 # EXCLUDE_TAGS: solution solution2 noexport
 # EXCLUDE_TAGS: solution noexport
