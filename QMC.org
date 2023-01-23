@@ -7,7 +7,7 @@
 #+LATEX_HEADER_EXTRA: \usepackage{minted}
 #+HTML_HEAD: <link rel="stylesheet" title="Standard" href="worg.css" type="text/css" />
 
-#+OPTIONS: H:2 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS: H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
 # EXCLUDE_TAGS: solution solution2 noexport
 # EXCLUDE_TAGS: solution noexport
@@ -297,7 +297,7 @@ int main() {
 #endif
     #+end_src
 
-    *Python*
+**** Python
 
      #+BEGIN_SRC python :noweb yes :results none :tangle test_hydrogen.py
 #!/usr/bin/env python3
@@ -309,7 +309,7 @@ def potential(r):
 <<test_p>>
      #+END_SRC
 
-    *Fortran*
+**** Fortran
 
     If the extension of your file is =.F90= and not =.f90=, the C
     preprocessor will be called before compiling. This enables the
@@ -333,7 +333,7 @@ end function potential
 <<test_f>>
      #+END_SRC
 
-     *C*
+**** C
 
      Compile your code with the ~-DTEST_H~ option. It will activate
      the creation of the main function that will test your functions.
@@ -357,8 +357,8 @@ double potential(double r[3]) {
      #+END_SRC
 
     
-**** Solution                                                      :solution:
-    *Python*
+*** Solution                                                      :solution:
+**** Python
      #+BEGIN_SRC python :results none :noweb yes
 #!/usr/bin/env python3
 import numpy as np
@@ -374,7 +374,7 @@ def potential(r):
 <<test_p>>
      #+END_SRC
 
-    *Fortran*
+**** Fortran
      #+BEGIN_SRC f90  :noweb yes
 double precision function potential(r)
   implicit none
@@ -396,7 +396,7 @@ end function potential
 <<test_f>>
      #+END_SRC
 
-     *C*
+**** C
      #+begin_src c :noweb yes
 #include <stdio.h>   // printf
 #include <math.h>    // sqrt
@@ -427,13 +427,13 @@ double potential(double r[3]) {
     function at the given point $\mathbf{r}$.
     #+end_exercise
     
-    *Python*
+**** Python
      #+BEGIN_SRC python :results none  :tangle none
 def psi(a, r):
     # TODO
      #+END_SRC
 
-    *Fortran*
+**** Fortran
      #+BEGIN_SRC f90  :tangle none
 double precision function psi(a, r)
   implicit none
@@ -444,21 +444,21 @@ double precision function psi(a, r)
 end function psi
      #+END_SRC
      
-     *C*
+**** C
      #+begin_src c :tangle none
 double psi(double a, double r[3]) {
   // TODO
 }
      #+end_src
 
-**** Solution                                                      :solution:
-    *Python*
+*** Solution                                                      :solution:
+**** Python
      #+BEGIN_SRC python :results none
 def psi(a, r):
     return np.exp(-a*np.sqrt(np.dot(r,r)))
      #+END_SRC
 
-    *Fortran*
+**** Fortran
      #+BEGIN_SRC f90 
 double precision function psi(a, r)
   implicit none
@@ -468,7 +468,7 @@ double precision function psi(a, r)
 end function psi
      #+END_SRC
      
-     *C*
+**** C
      #+begin_src c
 double psi(double a, double r[3]) {
   double distance;
@@ -523,13 +523,13 @@ double psi(double a, double r[3]) {
     T_L (\mathbf{r}) = -\frac{1}{2}\left(a^2 - \frac{2a}{\mathbf{|r|}} \right) 
     $$
      
-    *Python*
+**** Python
      #+BEGIN_SRC python :results none :tangle none
 def kinetic(a,r):
     # TODO
      #+END_SRC
 
-    *Fortran*
+**** Fortran
      #+BEGIN_SRC f90  :tangle none
 double precision function kinetic(a,r)
   implicit none
@@ -540,15 +540,15 @@ double precision function kinetic(a,r)
 end function kinetic
      #+END_SRC
 
-     *C*
+**** C
      #+begin_src c :tangle none
 double kinetic(double a, double r[3]) {
   //TODO
 }
      #+end_src
 
-**** Solution                                                      :solution:
-    *Python*
+*** Solution                                                      :solution:
+**** Python
      #+BEGIN_SRC python :results none
 def kinetic(a,r):
     distance = np.sqrt(np.dot(r,r))
@@ -560,7 +560,7 @@ def kinetic(a,r):
     return a * (dinv - 0.5 * a)
      #+END_SRC
 
-    *Fortran*
+**** Fortran
      #+BEGIN_SRC f90 
 double precision function kinetic(a,r)
   implicit none
@@ -580,7 +580,7 @@ double precision function kinetic(a,r)
 end function kinetic
      #+END_SRC
 
-     *C*
+**** C
      #+begin_src c
 double kinetic(double a, double r[3]) {
   double distance;
@@ -613,13 +613,13 @@ double kinetic(double a, double r[3]) {
     $$
 
     
-    *Python*
+**** Python
      #+BEGIN_SRC python :results none :tangle none
 def e_loc(a,r):
     #TODO
      #+END_SRC
 
-     *Fortran*
+**** Fortran
 
     #+begin_note
     When you call a function in Fortran, you need to declare its
@@ -643,21 +643,21 @@ double precision function e_loc(a,r)
 end function e_loc
     #+END_SRC
    
-    *C*
+**** C
      #+begin_src c :tangle none
 double e_loc(double a, double r[3]) {
   // TODO
 }
      #+end_src
 
-**** Solution                                                      :solution:
-    *Python*
+*** Solution                                                      :solution:
+**** Python
      #+BEGIN_SRC python :results none
 def e_loc(a,r):
     return kinetic(a,r) + potential(r)
      #+END_SRC
 
-    *Fortran*
+**** Fortran
      #+BEGIN_SRC f90
 double precision function e_loc(a,r)
   implicit none
@@ -671,7 +671,7 @@ double precision function e_loc(a,r)
 end function e_loc
      #+END_SRC
    
-     *C*
+**** C
      #+begin_src c
 double e_loc(double a, double r[3]) {
   return kinetic(a, r) + potential(r);
@@ -684,7 +684,7 @@ double e_loc(double a, double r[3]) {
     Find the theoretical value of $a$ for which $\Psi$ is an eigenfunction of $\hat{H}$.
     #+end_exercise
 
-**** Solution                                                      :solution:
+*** Solution                                                      :solution:
 
   \begin{eqnarray*}
   E &=& \frac{\hat{H} \Psi}{\Psi} = - \frac{1}{2} \frac{\Delta \Psi}{\Psi} -
@@ -768,7 +768,7 @@ gcc hydrogen.c plot_hydrogen.c -lm -o plot_hydrogen
    choose a grid that doesn't contain the origin to avoid numerical issues.
    #+end_note
 
-    *Python*
+**** Python
      #+BEGIN_SRC python :results none :tangle none
 #!/usr/bin/env python3
 
@@ -787,7 +787,7 @@ plt.legend()
 plt.savefig("plot_py.png")
      #+end_src
 
-    *Fortran*
+**** Fortran
      #+begin_src f90  :tangle none
 program plot
   implicit none
@@ -813,7 +813,7 @@ gfortran hydrogen.F90 plot_hydrogen.F90 -o plot_hydrogen
 ./plot_hydrogen > data
      #+end_src
 
-     *C*
+**** C
      
      #+begin_src c :tangle none
 #include <stdio.h>
@@ -862,8 +862,8 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
      './data' index 5 using 1:2 with lines title 'a=2.0'
      #+end_src
 
-**** Solution                                                      :solution:
-    *Python*
+*** Solution                                                      :solution:
+**** Python
      #+BEGIN_SRC python :results none
 #!/usr/bin/env python3
 
@@ -888,7 +888,7 @@ plt.savefig("plot_py.png")
 
      [[./plot_py.png]]
 
-    *Fortran*
+**** Fortran
      #+begin_src f90 
 program plot
   implicit none
@@ -927,7 +927,7 @@ gfortran hydrogen.F90 plot_hydrogen.F90 -o plot_hydrogen
 
      #+RESULTS:
 
-     *C*
+**** C
      #+begin_src c :tangle hydrogen.h
 double potential (double r[3]);
 double psi       (double a, double r[3]);
@@ -1024,7 +1024,7 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
     \mathbf{r} \le (5,5,5)$.
      #+end_exercise
 
-    *Python*
+**** Python
      #+BEGIN_SRC python :results none :tangle none
 #!/usr/bin/env python3
 
@@ -1042,7 +1042,7 @@ for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
 
      #+end_src
 
-    *Fortran*
+**** Fortran
      #+begin_src f90 :tangle none
 program energy_hydrogen
   implicit none
@@ -1074,7 +1074,7 @@ gfortran hydrogen.F90 energy_hydrogen.F90 -o energy_hydrogen
 ./energy_hydrogen 
      #+end_src
 
-     *C*
+**** C
      
      #+begin_src c :tangle none
 #include <stdio.h>
@@ -1131,8 +1131,8 @@ gcc hydrogen.c energy_hydrogen.c -lm -o energy_hydrogen
     by dividing the accumulated energy by the accumulated normalization
     factor, and prints the value of ~a~ and the corresponding energy.
 
-**** Solution                                                      :solution:
-    *Python*
+*** Solution                                                      :solution:
+**** Python
      #+BEGIN_SRC python :results none :exports both
 #!/usr/bin/env python3
 
@@ -1175,7 +1175,7 @@ for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
      : a = 1.5 	 E = -0.39242967082602226
      : a = 2.0 	 E = -0.08086980667844901
 
-    *Fortran*
+**** Fortran
      #+begin_src f90 
 program energy_hydrogen
   implicit none
@@ -1238,7 +1238,7 @@ gfortran hydrogen.F90 energy_hydrogen.F90 -o energy_hydrogen
      :  a =    1.5000000000000000          E =  -0.39242967082602065     
      :  a =    2.0000000000000000          E =   -8.0869806678448772E-002
 
-     *C*
+**** C
      #+begin_src c
 #include <stdio.h>
 #include <math.h>
@@ -1331,7 +1331,7 @@ gcc hydrogen.c energy_hydrogen.c -lm -o energy_hydrogen
    $$\langle \left( E - \langle E \rangle_{\Psi^2} \right)^2\rangle_{\Psi^2}  = \langle E^2 \rangle_{\Psi^2} - \langle E \rangle_{\Psi^2}^2 $$
    #+end_exercise
    
-**** Solution                                                 :solution:
+*** Solution                                                 :solution:
 
    $\bar{E} = \langle E \rangle$ is a constant, so $\langle \bar{E}
    \rangle = \bar{E}$ .
@@ -1353,7 +1353,7 @@ gcc hydrogen.c energy_hydrogen.c -lm -o energy_hydrogen
    \mathbf{r} \le (5,5,5)$ for different values of $a$.
    #+end_exercise
      
-    *Python*
+**** Python
      #+begin_src python :results none :tangle none
 #!/usr/bin/env python3
 
@@ -1368,7 +1368,7 @@ for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
     print(f"a = {a} \t E = {E:10.8f} \t \sigma^2 = {s2:10.8f}")
     #+end_src
 
-    *Fortran*
+**** Fortran
      #+begin_src f90 :tangle none
 program variance_hydrogen
   implicit none
@@ -1403,7 +1403,7 @@ gfortran hydrogen.F90 variance_hydrogen.F90 -o variance_hydrogen
 ./variance_hydrogen
      #+end_src
 
-     *C*
+**** C
      #+begin_src c :tangle none
 #include <stdio.h>
 #include <math.h>
@@ -1437,8 +1437,8 @@ gcc hydrogen.c variance_hydrogen.c -lm -o variance_hydrogen
 ./variance_hydrogen
      #+end_src
 
-**** Solution                                                     :solution:
-     *Python*
+*** Solution                                                     :solution:
+**** Python
      #+BEGIN_SRC python :results none :exports both
 #!/usr/bin/env python3
 
@@ -1488,7 +1488,7 @@ for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
      : a = 1.5 	 E = -0.39242967 	 \sigma^2 = 0.31449671
      : a = 2.0 	 E = -0.08086981 	 \sigma^2 = 1.80688143
 
-    *Fortran*
+**** Fortran
     #+begin_src f90 
 program variance_hydrogen
   implicit none
@@ -1562,7 +1562,7 @@ gfortran hydrogen.F90 variance_hydrogen.F90 -o variance_hydrogen
      :  a =    1.5000000000000000       E =  -0.39242967082602065       s2 =   0.31449670909172917     
      :  a =    2.0000000000000000       E =   -8.0869806678448772E-002  s2 =    1.8068814270846534     
      
-     *C*
+**** C
      #+begin_src c
 #include <stdio.h>
 #include <math.h>
@@ -1681,7 +1681,7 @@ gcc hydrogen.c variance_hydrogen.c -lm -o variance_hydrogen
 
    #+end_exercise
 
-    *Python*
+**** Python
      #+BEGIN_SRC python :results none :tangle none
 #!/usr/bin/env python3
 
@@ -1691,7 +1691,7 @@ def ave_error(arr):
     return (average, error)
      #+END_SRC
 
-    *Fortran*
+**** Fortran
     #+BEGIN_SRC f90 :tangle none
 subroutine ave_error(x,n,ave,err)
   implicit none
@@ -1704,7 +1704,7 @@ subroutine ave_error(x,n,ave,err)
 end subroutine ave_error
     #+END_SRC
    
-    *C*
+**** C
      #+begin_src c :tangle none
 #include <stdio.h>
 #include <math.h>
@@ -1735,8 +1735,8 @@ void ave_error(double* x, size_t n, double *ave, double *err) {
    average and dividing by ~n-1~. Finally, it calculates the error by
    taking the square root of the variance divided by ~n~.
 
-**** Solution                                                     :solution:
-     *Python*
+*** Solution                                                     :solution:
+**** Python
      #+BEGIN_SRC python :results none :exports code
 #!/usr/bin/env python3
 
@@ -1757,7 +1757,7 @@ def ave_error(arr):
     return (average, error)
      #+END_SRC
 
-     *Fortran*
+**** Fortran
      #+BEGIN_SRC f90 :exports both
 subroutine ave_error(x,n,ave,err)
   implicit none
@@ -1785,7 +1785,7 @@ subroutine ave_error(x,n,ave,err)
 end subroutine ave_error
      #+END_SRC
    
-     *C*
+**** C
      #+begin_src c :tangle qmc_stats.h
 #include <stddef.h> // for size_t
 void ave_error(double* x, size_t n, double *ave, double *err);
@@ -1877,7 +1877,7 @@ void ave_error(double* x, size_t n, double *ave, double *err) {
     compute the average energy and the associated error bar ($\delta E$).
     #+end_exercise
 
-    *Python*
+**** Python
      #+begin_note
      To draw a uniform random number in Python, you can use
      the [[https://numpy.org/doc/stable/reference/random/generated/numpy.random.uniform.html][~random.uniform~]] function of Numpy.
@@ -1900,7 +1900,7 @@ nmax = 100000
 print(f"E = {E} +/- {deltaE}")
      #+END_SRC
 
-    *Fortran*
+**** Fortran
      #+begin_note
      To draw a uniform random number in Fortran, you can use
      the [[https://gcc.gnu.org/onlinedocs/gfortran/RANDOM_005fNUMBER.html][~RANDOM_NUMBER~]] subroutine.
@@ -1951,7 +1951,7 @@ gfortran hydrogen.F90 qmc_stats.F90 qmc_uniform.F90 -o qmc_uniform
 ./qmc_uniform
      #+end_src
 
-     *C* 
+**** C*
      #+begin_note
      To draw a uniform random number in C, you can use:
      ~drand48()~, which is defined in the ~stdlib.h~ header. To
@@ -2041,8 +2041,8 @@ int main(void) {
 
     Finally, the program prints the average and error of the energies.
 
-**** Solution                                                     :solution:
-    *Python*
+*** Solution                                                     :solution:
+**** Python
      #+BEGIN_SRC python :results output :exports both
 #!/usr/bin/env python3
 
@@ -2076,7 +2076,7 @@ print(f"E = {E} +/- {deltaE}")
      #+RESULTS:
      : E = -0.4793311279357434 +/- 0.002563797463053474
 
-    *Fortran*
+**** Fortran
      #+BEGIN_SRC f90 :exports code
 subroutine uniform_montecarlo(a,nmax,energy)
   implicit none
@@ -2137,7 +2137,7 @@ gfortran hydrogen.F90 qmc_stats.F90 qmc_uniform.F90 -o qmc_uniform
      #+RESULTS:
      :  E =  -0.47958062416368030      +/-   3.1460315707685389E-003
 
-     *C*
+**** C
      #+begin_src c :exports code
 #include <stdlib.h>
 #include <math.h>
@@ -2314,7 +2314,7 @@ gcc hydrogen.c qmc_stats.c qmc_uniform.c -lm -o qmc_uniform
     Can you observe a reduction in the statistical error?
     #+end_exercise
 
-    *Python*
+**** Python
      #+BEGIN_SRC python :results output :tangle none
 #!/usr/bin/env python3
 
@@ -2346,7 +2346,7 @@ A, deltaA = ave_error(X)
 print(f"A = {A} +/- {deltaA}")
      #+END_SRC
 
-    *Fortran*
+**** Fortran
      #+BEGIN_SRC f90 :tangle none
 subroutine metropolis_montecarlo(a,nmax,dt,energy,accep)
   implicit none
@@ -2391,7 +2391,7 @@ program qmc
 end program qmc
      #+END_SRC
 
-     *C*
+**** C
      #+begin_src c :tangle none
 #include <stdio.h>
 #include <stdlib.h>
@@ -2434,8 +2434,8 @@ int main(void) {
 }
 
      #+end_src     
-**** Solution                                                      :solution:
-    *Python*
+*** Solution                                                      :solution:
+**** Python
      #+BEGIN_SRC python :results output :exports both
 #!/usr/bin/env python3
 
@@ -2487,7 +2487,7 @@ print(f"A = {A} +/- {deltaA}")
      : E = -0.4802595860693983 +/- 0.0005124420418289207
      : A = 0.5074913333333334 +/- 0.000350889422714878
 
-    *Fortran*
+**** Fortran
      #+BEGIN_SRC f90 :exports code
 subroutine metropolis_montecarlo(a,nmax,dt,energy,accep)
   implicit none
@@ -2570,7 +2570,7 @@ gfortran hydrogen.F90 qmc_stats.F90 qmc_metropolis.F90 -o qmc_metropolis
      :  E =  -0.48031509056922989      +/-   4.6803231523088529E-004
      :  A =   0.50765333333333340      +/-   3.4368267017377720E-004
 
-     *C*
+**** C
      #+begin_src c
 #include <stdio.h>
 #include <stdlib.h>
@@ -2768,7 +2768,7 @@ gcc hydrogen.c qmc_stats.c qmc_metropolis.c -lm -o qmc_metropolis
     the ~qmc_stats.F90~ or ~qmc_stats.c~ file.
     #+end_exercise
 
-    *Fortran*
+**** Fortran
     #+BEGIN_SRC f90 :tangle qmc_stats.F90
 subroutine random_gauss(z,n)
   implicit none
@@ -2804,7 +2804,7 @@ subroutine random_gauss(z,n)
 end subroutine random_gauss
     #+END_SRC
 
-    *C*
+**** C
     #+begin_src c :tangle qmc_stats.h
 void random_gauss(double* z, size_t n);
     #+end_src
@@ -2849,13 +2849,13 @@ void random_gauss(double* z, size_t n) {
      Write a function to compute the drift vector $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$.
      #+end_exercise
    
-    *Python*
+**** Python
      #+BEGIN_SRC python :tangle none
 def drift(a,r):
    # TODO
      #+END_SRC
 
-    *Fortran*
+**** Fortran
      #+BEGIN_SRC f90 :tangle none
 subroutine drift(a,r,b)
   implicit none
@@ -2867,22 +2867,22 @@ subroutine drift(a,r,b)
 end subroutine drift
      #+END_SRC
 
-     *C*
+**** C
      #+begin_src c :tangle no
 void drift(double a, double r[3], double b[3]) {
   //TODO
 }
      #+end_src
 
-**** Solution                                                     :solution:
-    *Python*
+*** Solution                                                     :solution:
+**** Python
      #+BEGIN_SRC python :tangle hydrogen.py
 def drift(a,r):
    ar_inv = -a/np.sqrt(np.dot(r,r))
    return r * ar_inv
      #+END_SRC
 
-    *Fortran*
+**** Fortran
      #+BEGIN_SRC f90 :tangle hydrogen.F90
 subroutine drift(a,r,b)
   implicit none
@@ -2897,7 +2897,7 @@ subroutine drift(a,r,b)
 end subroutine drift
      #+END_SRC
 
-     *C*
+**** C
      #+begin_src c :tangle hydrogen.h
 void drift(double a, double r[3], double b[3]);
      #+end_src
@@ -2919,7 +2919,7 @@ void drift(double a, double r[3], double b[3]) {
     #+end_exercise
    
 
-    *Python*
+**** Python
      #+BEGIN_SRC python :results output :tangle none
 #!/usr/bin/env python3
 
@@ -2947,7 +2947,7 @@ A, deltaA = ave_error(X)
 print(f"A = {A} +/- {deltaA}")
      #+END_SRC
 
-    *Fortran*
+**** Fortran
      #+BEGIN_SRC f90 :tangle none
 subroutine variational_montecarlo(a,nmax,dt,energy,accep)
   implicit none
@@ -2997,7 +2997,7 @@ gfortran hydrogen.F90 qmc_stats.F90 vmc_metropolis.F90 -o vmc_metropolis
 ./vmc_metropolis
      #+end_src
 
-     *C*
+**** C
      #+begin_src c :tangle none
 #include <stdio.h>
 #include <stdlib.h>
@@ -3046,7 +3046,7 @@ int main(void) {
 gcc hydrogen.c qmc_stats.c vmc_metropolis.c -lm -o vmc_metropolis
 ./vmc_metropolis
      #+end_src
-**** Solution                                                      :solution:
+*** Solution                                                      :solution:
 
     #+begin_note
     The ratio of transition probabilities can be expressed as:
@@ -3093,7 +3093,7 @@ gcc hydrogen.c qmc_stats.c vmc_metropolis.c -lm -o vmc_metropolis
   \right) \right] 
     \end{eqnarray*}
     #+end_note
-    *Python*
+**** Python
      #+BEGIN_SRC python :results output :exports both
 #!/usr/bin/env python3
 
@@ -3161,7 +3161,7 @@ print(f"A = {A} +/- {deltaA}")
      : E = -0.48034171558629885 +/- 0.0005286038561061781
      : A = 0.6210380000000001 +/- 0.0005457375900937905
    
-    *Fortran*
+**** Fortran
      #+BEGIN_SRC f90
 subroutine variational_montecarlo(a,nmax,dt,energy,accep)
   implicit none
@@ -3269,7 +3269,7 @@ gfortran hydrogen.F90 qmc_stats.F90 vmc_metropolis.F90 -o vmc_metropolis
      :  E =  -0.47965766050774800      +/-   5.0599992102209337E-004
      :  A =   0.62055466666666670      +/-   4.3100330247376571E-004
      
-     *C*
+**** C
      #+begin_src c
 #include <stdio.h>
 #include <stdlib.h>
@@ -3684,7 +3684,7 @@ gcc hydrogen.c qmc_stats.c vmc_metropolis.c -lm -o vmc_metropolis
      time $\tau_{\text{max}}$ =100 a.u. 
      #+end_exercise
    
-    *Python*
+**** Python
          #+BEGIN_SRC python :results output
 from hydrogen  import *
 from qmc_stats import *
@@ -3714,7 +3714,7 @@ print(f"A = {A} +/- {deltaA}")
 
          #+RESULTS:
 
-    *Fortran*
+**** Fortran
      #+BEGIN_SRC f90 :tangle none
 subroutine pdmc(a, nmax, dt, energy, accep, tau, E_ref)
   implicit none
@@ -3767,7 +3767,7 @@ gfortran hydrogen.F90 qmc_stats.F90 pdmc.F90 -o pdmc
 ./pdmc
      #+end_src
 
-     *C*
+**** C
      #+begin_src c :tangle none
 #include <stdio.h>
 #include <stdlib.h>
@@ -3818,9 +3818,9 @@ int main(void) {
 gcc hydrogen.c qmc_stats.c pdmc.c -lm -o pdmc
 ./pdmc
      #+end_src
-**** Solution                                                      :solution:
+*** Solution                                                      :solution:
 
-     *Python*
+**** Python
      #+BEGIN_SRC python :results output
 #!/usr/bin/env python3
 
@@ -3904,7 +3904,7 @@ print(f"A = {A} +/- {deltaA}")
      : E = -0.50036935994773 +/- 0.0014489649023857437
      : A = 0.9895569999999999 +/- 7.485027199944374e-05
 
-     *Fortran* 
+**** Fortran*
      #+BEGIN_SRC f90
 subroutine pdmc(a, dt, nmax, energy, accep, tau, E_ref)
   implicit none
@@ -4029,7 +4029,7 @@ gfortran hydrogen.F90 qmc_stats.F90 pdmc.F90 -o pdmc
      #+end_src
 
 
-     *C*
+**** C
      #+begin_src c 
 #include <stdio.h>
 #include <stdlib.h>
