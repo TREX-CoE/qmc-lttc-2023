@@ -19,7 +19,7 @@ def MonteCarlo(a, nmax):
      return energy / normalization
 
 a    = 1.2
-nmax = 10000
+nmax = 100000
 
 X = [MonteCarlo(a,nmax) for i in range(30)]
 E, deltaE = ave_error(X)
