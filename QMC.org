@@ -97,9 +97,6 @@
 
   $$ \int_{-\infty}^\infty P(x)\,dx = 1. $$
 
-# and $dP(x)$ satisfies:
-
-# $$ dP(x) = \int_{0}^x P(y)\,dy . $$
 
   Similarly, we can view the energy of a system, $E$, as the expected value of the local energy with respect to
   a probability density $P(\mathbf{r})$ defined in $3N$ dimensions:
@@ -115,6 +112,11 @@
   energy computed over these configurations:
   
   $$ E \approx \frac{1}{N_{\rm MC}} \sum_{i=1}^{N_{\rm MC}} E_L(\mathbf{r}_i) \,. $$
+
+  Here is an animation of the local energy in the N_{2} molecule along
+  a QMC trajectory:
+
+  [[./n2.gif]]
   
 * Numerical evaluation of the energy of the hydrogen atom
 
