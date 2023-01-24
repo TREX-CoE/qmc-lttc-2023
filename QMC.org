@@ -2732,6 +2732,7 @@ gcc hydrogen.c qmc_stats.c qmc_metropolis.c -lm -o qmc_metropolis
    variance $\delta t$.
 
    Here is an illustration of a trajectory:
+
    [[./H2_traj.png]]
 
    Averaging all the trajectories converges to the density of the
