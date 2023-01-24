@@ -8,7 +8,7 @@ else
     emacs --batch --load ../docs/config.el $INPUT -f org-html-export-to-html
 fi
 
-cp ../*png .
+cp ../*png ../*.gif .
 mv ../QMC.html index.html
 
 
