@@ -2198,7 +2198,7 @@ gcc hydrogen.c qmc_stats.c qmc_uniform.c -lm -o qmc_uniform
      #+RESULTS:
      : E = -0.479507 +/- 0.001972
 
-** Metropolis sampling with $\Psi^2$
+** Metropolis sampling with \Psi^2
    :PROPERTIES:
    :header-args:python: :tangle qmc_metropolis.py
    :header-args:f90: :tangle qmc_metropolis.F90
