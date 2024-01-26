@@ -1,0 +1,97 @@
+#+TITLE: Project: Quantum Monte Carlo
+#+AUTHOR: C. Filippi, A. Scemama
+#+LANGUAGE:  en
+#+INFOJS_OPT: toc:f mouse:underline path:org-info.js
+#+STARTUP: latexpreview
+#+LATEX_CLASS: article
+#+LATEX_HEADER_EXTRA: \usepackage{minted}
+#+HTML_HEAD: <link rel="stylesheet" title="Standard" href="worg.css" type="text/css" />
+
+#+OPTIONS: H:4 num:t toc:f \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t author:nil
+#+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+
+  #+BEGIN_SRC elisp :output none :exports none
+(setq org-latex-listings 'minted
+      org-latex-packages-alist '(("" "minted"))
+      org-latex-pdf-process
+      '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+(setq org-latex-minted-options '(("breaklines" "true")
+                                 ("breakanywhere" "true")))
+(setq org-latex-minted-options
+      '(("frame" "lines")
+        ("fontsize" "\\scriptsize")
+        ("linenos" "")))
+(org-latex-export-to-pdf)
+                            
+  #+END_SRC   
+
+  #+RESULTS:
+  : /home/scemama/TREX-Admin/WP6/qmc-lttc-2023/Project.pdf
+
+
+In the lab session, you have implemented a Variational Monte Carlo (VMC)
+program to compute the ground state energy of the Hydrogen atom.
+Then, I presented how you can modify it into a pure diffusion Monte
+Carlo (PDMC) program
+
+We recall the algorithm here:
+
+   0) Start with $W(\mathbf{r}_0)=1, \tau_0 = 0$
+   1) Evaluate the local energy at $\mathbf{r}_{n}$
+   2) Compute the contribution to the weight $w(\mathbf{r}_n) =
+      \exp(-\delta t(E_L(\mathbf{r}_n)-E_\text{ref}))$
+   3) Update $W(\mathbf{r}_{n}) = W(\mathbf{r}_{n-1}) \times w(\mathbf{r}_n)$
+   4) Accumulate the weighted energy $W(\mathbf{r}_n) \times
+      E_L(\mathbf{r}_n)$,
+      and the weight $W(\mathbf{r}_n)$ for the normalization
+   5) Update $\tau_n = \tau_{n-1} + \delta t$
+   6) If $\tau_{n} > \tau_\text{max}$ ($\tau_\text{max}$ is an input parameter), the long projection time has
+      been reached and we can start an new trajectory from the current
+      position: reset $W(r_n) = 1$ and $\tau_n
+      = 0$
+   7) Compute a new position $\mathbf{r'} = \mathbf{r}_n +
+      \delta t\, \frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi$
+   8) Evaluate $\Psi(\mathbf{r}')$ and $\frac{\nabla \Psi(\mathbf{r'})}{\Psi(\mathbf{r'})}$ at the new position
+   9) Compute the ratio $A = \frac{T(\mathbf{r}' \rightarrow \mathbf{r}_{n}) P(\mathbf{r}')}{T(\mathbf{r}_{n} \rightarrow \mathbf{r}') P(\mathbf{r}_{n})}$
+  10) Draw a uniform random number $v \in [0,1]$
+  11) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
+  12) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
+
+
+In this project, you will generalize the QMC code so that you can run
+calculations for more than one electron and more than one nucleus.
+You code will allow to perform a VMC run or a PDMC, depending on a
+keyword given as input.
+
+The parameters of the wave function (nuclear coordinates, exponents, 
+etc), and the parameters of the simulation (time step, number of Monte
+Carlo steps, VMC or PDMC, etc) will have to be read from an input
+file, in such a way that the same program will be able to compute the
+ground state energy of
+
+- the Hydrogen atom
+- the Helium atom
+- the H_{2}^{+} ion at $R$ = 0.7 Angstrom
+- the H_{2} molecule at $R$ = 0.7 Angstrom
+- the H_{3}^{+} ion at the following geometry (Angstrom):
+
+  #+begin_example
+ H    -0.049222     0.000000    -0.085255
+ H    -0.049222     0.000000     0.785255
+ H     0.704662     0.000000     0.350000
+  #+end_example
+
+Hint: Don't forget to convert the coordinates from Angstrom to atomic units.
+
+Hint: Remark that the only difference in the VMC and a PDMC algorithms is the
+introduction of the weight at step 2.
+
+The website https://trex-coe.github.io/qmc-lttc-2023 is always accessible,
+and the solutions to the all exercises are available.
+    
+
+
+
+   
