@@ -2727,11 +2727,12 @@ gcc hydrogen.c qmc_stats.c qmc_metropolis.c -lm -o qmc_metropolis
    
    \[
    \mathbf{r}_{n+1} = \mathbf{r}_{n} + \delta t\, \frac{\nabla
-   \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi \,,
+   \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \sqrt{\delta t}\, \chi \,,
    \]
 
    where $\chi$ is a Gaussian random variable with zero mean and
-   variance $\delta t$.
+   variance 1. Multiplying by $\sqrt{\delta t}$ makes the variance
+   of the additional noise equal to $\delta{t}$.
 
    Here is an illustration of a trajectory:
 
@@ -2745,7 +2746,8 @@ gcc hydrogen.c qmc_stats.c qmc_metropolis.c -lm -o qmc_metropolis
    
    1) Evaluate the local energy at $\mathbf{r}_{n}$ and accumulate it
    2) Compute a new position $\mathbf{r'} = \mathbf{r}_n +
-      \delta t\, \frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi$
+      \delta t\, \frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})} +
+      \sqrt{\delta t}\,\chi$
    3) Evaluate $\Psi(\mathbf{r}')$ and $\frac{\nabla \Psi(\mathbf{r'})}{\Psi(\mathbf{r'})}$ at the new position
    4) Compute the ratio $A = \frac{T(\mathbf{r}' \rightarrow \mathbf{r}_{n}) P(\mathbf{r}')}{T(\mathbf{r}_{n} \rightarrow \mathbf{r}') P(\mathbf{r}_{n})}$
    5) Draw a uniform random number $v \in [0,1]$
@@ -2761,6 +2763,9 @@ gcc hydrogen.c qmc_stats.c qmc_metropolis.c -lm -o qmc_metropolis
     z_1 &=& \sqrt{-2 \ln u_1} \cos(2 \pi u_2) \\
     z_2 &=& \sqrt{-2 \ln u_1} \sin(2 \pi u_2) 
     \end{eqnarray*}
+
+    This gives Gaussian-distributed random numbers with zero mean and
+    a variance of one.
 
     Below is a Fortran and a C implementation returning a
     Gaussian-distributed n-dimensional vector $\mathbf{z}$. This will
@@ -3645,7 +3650,8 @@ gcc hydrogen.c qmc_stats.c vmc_metropolis.c -lm -o vmc_metropolis
       position: reset $W(r_n) = 1$ and $\tau_n
       = 0$
    7) Compute a new position $\mathbf{r'} = \mathbf{r}_n +
-      \delta t\, \frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi$
+      \delta t\, \frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})} +
+      \sqrt{\delta t}\, \chi$
    8) Evaluate $\Psi(\mathbf{r}')$ and $\frac{\nabla \Psi(\mathbf{r'})}{\Psi(\mathbf{r'})}$ at the new position
    9) Compute the ratio $A = \frac{T(\mathbf{r}' \rightarrow \mathbf{r}_{n}) P(\mathbf{r}')}{T(\mathbf{r}_{n} \rightarrow \mathbf{r}') P(\mathbf{r}_{n})}$
   10) Draw a uniform random number $v \in [0,1]$
