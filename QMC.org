@@ -360,7 +360,7 @@ double potential(double r[3]) {
      #+END_SRC
 
     
-*** Solution                                                      :solution3:
+*** Solution                                                      :solution:
 **** Python
      #+BEGIN_SRC python :results none :noweb yes
 #!/usr/bin/env python3
@@ -454,7 +454,7 @@ double psi(double a, double r[3]) {
 }
      #+end_src
 
-*** Solution                                                      :solution3:
+*** Solution                                                      :solution:
 **** Python
      #+BEGIN_SRC python :results none
 def psi(a, r):
@@ -550,7 +550,7 @@ double kinetic(double a, double r[3]) {
 }
      #+end_src
 
-*** Solution                                                      :solution3:
+*** Solution                                                      :solution:
 **** Python
      #+BEGIN_SRC python :results none
 def kinetic(a,r):
@@ -653,7 +653,7 @@ double e_loc(double a, double r[3]) {
 }
      #+end_src
 
-*** Solution                                                      :solution3:
+*** Solution                                                      :solution:
 **** Python
      #+BEGIN_SRC python :results none
 def e_loc(a,r):
@@ -687,7 +687,7 @@ double e_loc(double a, double r[3]) {
     Find the theoretical value of $a$ for which $\Psi$ is an eigenfunction of $\hat{H}$.
     #+end_exercise
 
-*** Solution                                                      :solution3:
+*** Solution                                                      :solution:
 
   \begin{eqnarray*}
   E &=& \frac{\hat{H} \Psi}{\Psi} = - \frac{1}{2} \frac{\Delta \Psi}{\Psi} -
