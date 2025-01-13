@@ -360,7 +360,7 @@ double potential(double r[3]) {
      #+END_SRC
 
     
-*** Solution                                                      :solution:
+*** Solution                                                      :solution3:
 **** Python
      #+BEGIN_SRC python :results none :noweb yes
 #!/usr/bin/env python3
