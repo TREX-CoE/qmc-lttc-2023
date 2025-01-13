@@ -12,6 +12,9 @@
 #+EXCLUDE_TAGS: solution solution2 noexport
 #+EXCLUDE_TAGS: solution noexport
 #+EXCLUDE_TAGS: noexport
+#+EXPORT_EXCLUDE_TAGS: solution solution2 noexport
+#+EXPORT_EXCLUDE_TAGS: solution noexport
+#+EXPORT_EXCLUDE_TAGS: noexport
 
   #+BEGIN_SRC elisp :output none :exports none
 (setq org-latex-listings 'minted
