@@ -11,9 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: install extra repository
-        run: sudo add-apt-repository ppa:kelleyk/emacs
-
       - name: refresh apt
         run: sudo apt-get update
 
@@ -31,4 +28,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
-
+    permissions:
+      contents: write
