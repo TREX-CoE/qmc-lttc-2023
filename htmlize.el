@@ -5,7 +5,7 @@
 ;; Author: Hrvoje Niksic <hniksic@gmail.com>
 ;; Homepage: https://github.com/hniksic/emacs-htmlize
 ;; Keywords: hypermedia, extensions
-;; Version: 1.57
+;; Version: 1.58
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -339,6 +339,12 @@ output.")
   "Hook run by `htmlize-file' after htmlizing a file, but before saving it.")
 
 (defvar htmlize-buffer-places)
+
+(defconst htmlize-image-mime-type-alist
+  '((svg . "svg+xml")
+    )
+  "Alist mapping Emacs image types to Mime media types.
+https://www.iana.org/assignments/media-types/media-types.xhtml#image")
 
 ;;; Some cross-Emacs compatibility.
 
@@ -589,10 +595,11 @@ list."
                      (htmlize-attr-escape (file-relative-name file))
                      alt-attr)))
           ((plist-get imgprops :data)
-           (format "<img src=\"data:image/%s;base64,%s\"%s />"
-                   (or (plist-get imgprops :type) "")
-                   (base64-encode-string (plist-get imgprops :data))
-                   alt-attr)))))
+           (let ((image-type (plist-get imgprops :type)))
+             (format "<img src=\"data:image/%s;base64,%s\"%s />"
+                     (or (alist-get image-type htmlize-image-mime-type-alist) image-type "")
+                     (base64-encode-string (plist-get imgprops :data))
+                     alt-attr))))))
 
 (defconst htmlize-ellipsis (propertize "..." 'htmlize-ellipsis t))
 
@@ -740,6 +747,7 @@ list."
              (let ((display (get-text-property match-pos 'display text))
                    (expanded-tab (aref htmlize-tab-spaces tab-size)))
                (when display
+                 (setq expanded-tab (copy-sequence expanded-tab))
                  (put-text-property 0 tab-size 'display display expanded-tab))
                (push expanded-tab chunks))
              (cl-incf column tab-size)
@@ -1035,8 +1043,7 @@ If no rgb.txt file is found, return nil."
     (while head
       (let ((inherit (face-attribute (car head) :inherit)))
         (cond ((listp inherit)
-               (setcdr tail (cl-copy-list inherit))
-               (setq tail (last tail)))
+               (setq tail (last inherit)))
               ((eq inherit 'unspecified))
               (t
                (setcdr tail (list inherit))
