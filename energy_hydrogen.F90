@@ -1,10 +1,10 @@
 program energy_hydrogen
   implicit none
   double precision, external :: e_loc, psi
-  double precision :: x(50), w, delta, energy, dx, r(3), a(6), normalization
+  double precision :: x(50), w, delta, energy, dx, r(3), a(7), normalization
   integer          :: i, k, l, j
 
-  a = (/ 0.1d0, 0.2d0, 0.5d0, 1.d0, 1.5d0, 2.d0 /)
+  a = (/ 0.1d0, 0.2d0, 0.5d0, 1.d0, 1.2d0, 1.5d0, 2.d0 /)
 
   dx = 10.d0/(size(x)-1)
   do i=1,size(x)

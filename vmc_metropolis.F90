@@ -73,10 +73,10 @@ end subroutine variational_montecarlo
 
 program qmc
   implicit none
-  double precision, parameter :: a     = 1.2d0
-  double precision, parameter :: dt    = 1.0d0
-  integer*8       , parameter :: nmax  = 100000
-  integer         , parameter :: nruns = 30
+  double precision, parameter :: a     = 0.5d0
+  double precision, parameter :: dt    = 0.1d0
+  integer*8       , parameter :: nmax  = 10000
+  integer         , parameter :: nruns = 500
 
   integer          :: irun
   double precision :: X(nruns), accep(nruns)
